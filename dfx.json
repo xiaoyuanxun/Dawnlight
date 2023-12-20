@@ -1,0 +1,25 @@
+{
+  "canisters": {
+    "bodhi_backend": {
+      "main": "src/bodhi_backend/main.mo",
+      "type": "motoko"
+    },
+    "bodhi_frontend": {
+      "dependencies": [
+        "bodhi_backend"
+      ],
+      "source": [
+        "src/bodhi_frontend/assets"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

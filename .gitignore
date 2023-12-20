@@ -1,0 +1,7 @@
+.DS_Store
+
+.dfx
+
+frontend/node_modules
+
+frontend/package-lock.json
