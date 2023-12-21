@@ -27,8 +27,8 @@ export const UserPage = React.memo(() => {
         tag === 0
           ?
           <div style={{margin: "20px 0", display: "flex", flexDirection: 'column', gap: "20px"}}>
-            <Content/>
-            <Content/>
+            <Content isHidden={true}/>
+            <Content isHidden={true}/>
           </div>
           :
           <div style={{marginTop: "28px"}}>

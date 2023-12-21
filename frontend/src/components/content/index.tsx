@@ -3,6 +3,7 @@ import styles from "./index.less"
 import {marked} from "marked";
 import {AssetPanel} from "../assetPanel";
 import {useNavigate} from "react-router-dom";
+import {Skeleton} from 'antd';
 
 const a = "# About Bodhi\n" +
   "\n" +
@@ -160,23 +161,32 @@ const a = "# About Bodhi\n" +
   "Now that you have a general understanding of what Bodhi is, to give you a deeper experience of it, this post itself is the very first asset on Bodhi.\n" +
   "\n" +
   "**Try trading it.**"
-export const Content = React.memo(() => {
-  const ref = useRef<HTMLDivElement | null>(null)
+export const Home = React.memo(() => {
+  return <div style={{width: "100%"}}>
+    <Content isHidden={false}/>
+    <div style={{height: "20px"}}/>
+    <AssetPanel/>
+    <div style={{height: "90px"}}/>
+    <FixedDiv/>
+  </div>
+})
 
+export const Content = React.memo((props: { isHidden: boolean }) => {
+  const {isHidden} = props
+  const ref = useRef<HTMLDivElement | null>(null)
+  const navigate = useNavigate()
   useEffect(() => {
     setTimeout(async () => {
       if (ref.current) {
         ref.current.innerHTML = await marked.parse(a)
       }
-    }, 500)
+    }, 0)
   }, [])
+  return <div className={styles.content_wrap}>
+    <div className={styles.content_header}>
 
-  return <div style={{width: "100%"}}>
-    <div className={styles.content_wrap}>
-      <div className={styles.content_header}>
-
-        <span>#0 Created by 🌱 0xD1</span>
-        <span style={{height: "24px", width: "24px"}}>
+      <span>#0 Created by 🌱 0xD1</span>
+      <span style={{height: "24px", width: "24px"}}>
           <svg viewBox="0 0 24 24" focusable="false" className="chakra-icon css-onkibi" aria-hidden="true"><g
             fill="currentColor" stroke="currentColor" strokeLinecap="square" strokeWidth="2"><circle cx="12" cy="12"
                                                                                                      fill="none"
@@ -185,25 +195,25 @@ export const Content = React.memo(() => {
             fill="none" x1="11.959" x2="11.959" y1="11" y2="17"></line><circle cx="11.959" cy="7" r="1"
                                                                                stroke="none"></circle></g></svg>
         </span>
+    </div>
+    {/*<div style={{width:'520px'}}>*/}
+    {/*  <Skeleton/>*/}
+    {/*</div>*/}
+    <div ref={ref} className={isHidden ? styles.content_main : styles.content_main_2}/>
+    <div className={styles.read_full_asset}
+         onClick={() => navigate("/")}>
+      Read Full Asset
+    </div>
+    <div className={styles.content_footer}>
+      <div className={styles.content_footer_left}>
+        <span>$392.75</span>
+        <span style={{fontSize: "14px", fontWeight: "300"}}> 0.17779 ETH / Share</span>
       </div>
-      <div ref={ref} style={{width: "100%"}}>
-
-      </div>
-      <div className={styles.content_footer}>
-        <div className={styles.content_footer_left}>
-          <span>$392.75</span>
-          <span style={{fontSize: "14px", fontWeight: "300"}}> 0.17779 ETH / Share</span>
-        </div>
-        <div className={styles.content_footer_right}>
-          <div className={styles.content_footer_right_button_1}>Buy</div>
-          <div className={styles.content_footer_right_button_2}>Sell</div>
-        </div>
+      <div className={styles.content_footer_right}>
+        <div className={styles.content_footer_right_button_1}>Buy</div>
+        <div className={styles.content_footer_right_button_2}>Sell</div>
       </div>
     </div>
-    <div style={{height: "20px"}}/>
-    <AssetPanel/>
-    <div style={{height: "90px"}}/>
-    <FixedDiv/>
   </div>
 })
 
