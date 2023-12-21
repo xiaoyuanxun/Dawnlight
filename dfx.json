@@ -1,15 +1,22 @@
 {
   "canisters": {
     "bodhi_backend": {
-      "main": "src/bodhi_backend/main.mo",
+      "main": "src/main.mo",
+      "type": "motoko"
+    },
+    "bucket": {
+      "main": "src/storage/bucket.mo",
       "type": "motoko"
     },
     "bodhi_frontend": {
+      "frontend": {
+        "entrypoint": "frontend/build/index.html"
+      },
       "dependencies": [
         "bodhi_backend"
       ],
       "source": [
-        "src/bodhi_frontend/assets"
+        "frontend/build"
       ],
       "type": "assets"
     }
