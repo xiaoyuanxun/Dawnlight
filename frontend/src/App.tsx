@@ -5,6 +5,7 @@ import {UserPage} from "./components/user";
 import {Explore} from "./components/explore";
 import {Routes, Route} from "react-router-dom";
 import {Assets} from "./components/assets";
+import {Editor} from "./components/editor";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path={"explore"} element={<Explore/>}/>
         <Route path={"address/:address"} element={<UserPage/>}/>
         <Route path={"top"} element={<Assets/>}/>
+        <Route path={"editor"} element={<Editor/>}/>
       </Routes>
     </div>
   );
