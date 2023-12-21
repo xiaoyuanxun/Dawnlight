@@ -2,6 +2,8 @@ import React, {useEffect, useRef} from "react"
 import styles from "./index.less"
 import {marked} from "marked";
 import {AssetPanel} from "../assetPanel";
+import {useNavigate} from "react-router-dom";
+
 const a = "# About Bodhi\n" +
   "\n" +
   "The content industry has never been a major industry. \n" +
@@ -198,8 +200,17 @@ export const Content = React.memo(() => {
         </div>
       </div>
     </div>
-    <div style={{height:"20px"}}/>
+    <div style={{height: "20px"}}/>
     <AssetPanel/>
+    <div style={{height: "90px"}}/>
+    <FixedDiv/>
+  </div>
+})
+
+const FixedDiv = React.memo(() => {
+  const navigate = useNavigate()
+  return <div className={styles.fixed_panel} onClick={() => navigate("/explore")}>
+    Enter Bodhi
   </div>
 })
 
