@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React from "react";
 import MDEditor from '@uiw/react-md-editor/nohighlight';
 import rehypeSanitize from "rehype-sanitize";
 import styles from "./index.less"
