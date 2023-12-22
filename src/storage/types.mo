@@ -61,8 +61,9 @@ module {
         stable_memory_size: Text
     };
 
-    public type BucketInterface = actor{
+    public type BucketActor = actor {
         get : query (key : Text, index : Nat) -> async ?(Blob, Text);
+        getFileAsset: query (key: Text) -> async ?FileAsset;
         http_request : query (request : HttpRequest) -> async HttpResponse;
         wallet_receive : () -> async Nat;
         store : (args : StoreArgs) -> async ();
