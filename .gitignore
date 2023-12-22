@@ -8,3 +8,5 @@ frontend/package-lock.json
 
 .env
 .mops
+
+src/declarations

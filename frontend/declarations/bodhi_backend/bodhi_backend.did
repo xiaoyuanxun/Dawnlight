@@ -1,0 +1,37 @@
+type bodhi = 
+ service {
+   buy: (nat, nat) -> (Result);
+   create: (text) -> (Result);
+   getAssetIdsByPrincipal: (principal) -> (opt vec nat) query;
+   getBuyPrice: (nat, nat) -> (nat) query;
+   getBuyPriceAfterFee: (nat, nat) -> (nat) query;
+   getPrice: (nat, nat) -> (nat) query;
+   getSellPrice: (nat, nat) -> (nat) query;
+   getSellPriceAfterFee: (nat, nat) -> (nat) query;
+   remove: (nat) -> (Result);
+   sell: (nat, nat) -> (Result);
+   uri: (nat) -> (text) query;
+ };
+type Result = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Error = 
+ variant {
+   AssetAlreadyCreated;
+   AssetNotExist;
+   AssetNotExistInBucket;
+   BurnError;
+   InsufficientBalance;
+   InsufficientPayment;
+   MintError;
+   SupplyNotAllowedBelowPremintAmount;
+   TokenOfAssetNotExist;
+   TransferCreatorFeeError;
+   TransferToMainAccountError;
+   TransferToSellAccountError;
+   Unauthorized;
+   UnknowError;
+ };
+service : (principal, principal) -> bodhi

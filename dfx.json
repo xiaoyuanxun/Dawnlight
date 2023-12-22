@@ -8,6 +8,10 @@
       "main": "src/storage/bucket.mo",
       "type": "motoko"
     },
+    "icrc_token": {
+      "main": "src/icrc/token.mo",
+      "type": "motoko"
+    },
     "bodhi_frontend": {
       "frontend": {
         "entrypoint": "frontend/build/index.html"
