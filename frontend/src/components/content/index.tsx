@@ -27,7 +27,7 @@ export const Home = React.memo(() => {
   }, [id])
 
   return <div style={{width: "100%"}}>
-    <Content isHidden={false} asset={data}/>
+    <Content isHidden={false} asset={data} isSimple={false}/>
     <div style={{height: "20px"}}/>
     <AssetPanel/>
     <div style={{height: "90px"}}/>
@@ -35,10 +35,9 @@ export const Home = React.memo(() => {
   </div>
 })
 
-export const Content = React.memo((props: { isHidden: boolean, asset?: Asset }) => {
-  const {isHidden, asset} = props
+export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, isSimple: boolean }) => {
+  const {isHidden, asset, isSimple} = props
   const ref = useRef<HTMLDivElement | null>(null)
-  const [content, setContent] = useState<string>()
   const navigate = useNavigate()
 
   const actor = React.useMemo(() => {
@@ -50,11 +49,12 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset }) 
   const fetchData = async () => {
     if (!asset) return
     try {
-      const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
-      const arraybuffer = await res.arrayBuffer()
+      // const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
+      // const arraybuffer = await res.arrayBuffer()
       setTimeout(async () => {
         if (ref.current) {
-          ref.current.innerHTML = await marked.parse(new TextDecoder().decode(arraybuffer))
+          // ref.current.innerHTML = await marked.parse(new TextDecoder().decode(arraybuffer))
+          ref.current.innerHTML = `<img width="520" height="520" src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}"/>`
         }
       }, 0)
     } catch (e) {
@@ -90,10 +90,10 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset }) 
     {/*  <Skeleton/>*/}
     {/*</div>*/}
     <div ref={ref} className={isHidden ? styles.content_main : styles.content_main_2}/>
-    <div className={styles.read_full_asset}
-         onClick={() => navigate(`/${Number(asset?.id)}`)}>
+    {isSimple && <div className={styles.read_full_asset}
+                      onClick={() => navigate(`/${Number(asset?.id)}`)}>
       Read Full Asset
-    </div>
+    </div>}
     <div className={styles.content_footer}>
       <div className={styles.content_footer_left}>
         <span>$392.75</span>

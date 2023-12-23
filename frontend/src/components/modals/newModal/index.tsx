@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Modal} from 'antd';
 import styles from "./index.less"
 import {bucketApi} from "../../../api/bucket";
+import {useDropzone} from "react-dropzone";
 
 export const NewModal = React.memo((props: { open: boolean, setOpen: Function }) => {
   const {open, setOpen} = props
@@ -37,6 +38,12 @@ export const NewModal = React.memo((props: { open: boolean, setOpen: Function })
 })
 
 const Step1 = React.memo((props: { setStep: Function }) => {
+  const onDrop = React.useCallback((files: File[]) => {
+    bucketApi.storeFile(files[0]).then(e => console.log("ok"))
+  }, [])
+
+  const {getRootProps, getInputProps} = useDropzone({onDrop, multiple: false})
+
   return <div className={styles.new_modal_content}>
     <div className={styles.new_modal_item} onClick={() => props.setStep(1)}>
           <span>
@@ -48,8 +55,10 @@ const Step1 = React.memo((props: { setStep: Function }) => {
       <p className={styles.p2}>Short messages or long article with markdown</p>
     </div>
     <div style={{height: "16px"}}/>
-    <div className={styles.new_modal_item}>
-          <span>
+
+    <div className={styles.new_modal_item} {...getRootProps()}>
+      <input {...getInputProps()} />
+      <span>
             <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 640 512" focusable="false"
                  className="chakra-icon css-19vv2c5" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path
               d="M608 0H160a32 32 0 0 0-32 32v96h160V64h192v320h128a32 32 0 0 0 32-32V32a32 32 0 0 0-32-32zM232 103a9 9 0 0 1-9 9h-30a9 9 0 0 1-9-9V73a9 9 0 0 1 9-9h30a9 9 0 0 1 9 9zm352 208a9 9 0 0 1-9 9h-30a9 9 0 0 1-9-9v-30a9 9 0 0 1 9-9h30a9 9 0 0 1 9 9zm0-104a9 9 0 0 1-9 9h-30a9 9 0 0 1-9-9v-30a9 9 0 0 1 9-9h30a9 9 0 0 1 9 9zm0-104a9 9 0 0 1-9 9h-30a9 9 0 0 1-9-9V73a9 9 0 0 1 9-9h30a9 9 0 0 1 9 9zm-168 57H32a32 32 0 0 0-32 32v288a32 32 0 0 0 32 32h384a32 32 0 0 0 32-32V192a32 32 0 0 0-32-32zM96 224a32 32 0 1 1-32 32 32 32 0 0 1 32-32zm288 224H64v-32l64-64 32 32 128-128 96 96z"></path></svg>

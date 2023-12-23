@@ -60,7 +60,7 @@ export const MyContents = React.memo(() => {
 
   return <div style={{margin: "20px 0", display: "flex", flexDirection: 'column', gap: "20px"}}>
     {data?.map((v, k) => {
-      return <Content key={k} asset={v} isHidden={true}/>
+      return <Content isSimple={true} key={k} asset={v} isHidden={true}/>
     })}
   </div>
 })

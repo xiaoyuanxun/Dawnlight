@@ -20,7 +20,7 @@ export const Assets = React.memo(() => {
     <div className={styles.assets_wrap}>
       {/*<p className={styles.p}>Top Assets(by Price)</p>*/}
       {data?.map((v, k) => {
-        return <Content asset={v} key={k} isHidden={true}/>
+        return <Content isSimple={true} asset={v} key={k} isHidden={true}/>
       })}
       <div style={{height: "20px"}}/>
     </div>
