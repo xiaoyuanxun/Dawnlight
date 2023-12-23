@@ -1,5 +1,6 @@
 import Result "mo:base/Result";
 import HttpHandler "httpHandler";
+import Time "mo:base/Time";
 
 module {
     type HttpRequest    = HttpHandler.HttpRequest;
@@ -16,17 +17,18 @@ module {
     };
 
     public type FileAsset = {
+        key: Text;
         read_page_field: [(Nat64, Nat64)];
         file_type: Text;
         total_size: Nat64;
         owner: Principal;
+        time: Time.Time;
     };
 
     public type FileBuf = {
         total_index : Nat;
         wrote_page : [var Bool];
         var received : Nat;
-        bucket_id : Principal;
         file_type: Text;
         total_size: Nat64;
     };
