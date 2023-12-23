@@ -35,6 +35,7 @@ export interface TokenMetaData {
 export interface bodhi {
   'buy' : ActorMethod<[bigint, bigint], Result>,
   'create' : ActorMethod<[string], Result_1>,
+  'getAsset' : ActorMethod<[bigint], [] | [Asset]>,
   'getAssetIdToTokenEntries' : ActorMethod<[], Array<[bigint, TokenMetaData]>>,
   'getAssetIdsByPrincipal' : ActorMethod<[Principal], [] | [Array<bigint>]>,
   'getAssetsEntries' : ActorMethod<[], Array<[bigint, Asset]>>,
@@ -45,12 +46,13 @@ export interface bodhi {
   'getPrice' : ActorMethod<[bigint, bigint], bigint>,
   'getSellPrice' : ActorMethod<[bigint, bigint], bigint>,
   'getSellPriceAfterFee' : ActorMethod<[bigint, bigint], bigint>,
+  'getTokenCanisterByAssetId' : ActorMethod<[bigint], [] | [Principal]>,
   'getTotalSupplyEntries' : ActorMethod<[], Array<[bigint, bigint]>>,
   'getUserAssetsEntries' : ActorMethod<[], Array<[Principal, Array<bigint>]>>,
-  'getUserBuyed' : ActorMethod<[Principal], Array<[bigint, bigint]>>,
+  'getUserBuyed' : ActorMethod<[Principal], Array<[Asset, bigint]>>,
   'getUserBuyedAssetsEntries' : ActorMethod<
     [],
-    Array<[Principal, Array<[bigint, bigint]>]>
+    Array<[Principal, Array<[Asset, bigint]>]>
   >,
   'getUserCreated' : ActorMethod<[Principal], Array<Asset>>,
   'getWicp' : ActorMethod<[Principal], Result>,

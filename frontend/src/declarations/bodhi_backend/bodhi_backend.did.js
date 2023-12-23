@@ -17,11 +17,6 @@ export const idlFactory = ({ IDL }) => {
   });
   const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const Result_1 = IDL.Variant({ 'ok' : IDL.Principal, 'err' : Error });
-  const TokenMetaData = IDL.Record({
-    'creator' : IDL.Principal,
-    'assetId' : IDL.Nat,
-    'canisterId' : IDL.Principal,
-  });
   const Time = IDL.Int;
   const Asset = IDL.Record({
     'id' : IDL.Nat,
@@ -30,9 +25,15 @@ export const idlFactory = ({ IDL }) => {
     'tokenCanister' : IDL.Principal,
     'fileKey' : IDL.Text,
   });
+  const TokenMetaData = IDL.Record({
+    'creator' : IDL.Principal,
+    'assetId' : IDL.Nat,
+    'canisterId' : IDL.Principal,
+  });
   const bodhi = IDL.Service({
     'buy' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'create' : IDL.Func([IDL.Text], [Result_1], []),
+    'getAsset' : IDL.Func([IDL.Nat], [IDL.Opt(Asset)], ['query']),
     'getAssetIdToTokenEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, TokenMetaData))],
@@ -63,6 +64,11 @@ export const idlFactory = ({ IDL }) => {
     'getPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
     'getSellPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
     'getSellPriceAfterFee' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
+    'getTokenCanisterByAssetId' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(IDL.Principal)],
+        ['query'],
+      ),
     'getTotalSupplyEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))],
@@ -75,16 +81,12 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getUserBuyed' : IDL.Func(
         [IDL.Principal],
-        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))],
+        [IDL.Vec(IDL.Tuple(Asset, IDL.Nat))],
         ['query'],
       ),
     'getUserBuyedAssetsEntries' : IDL.Func(
         [],
-        [
-          IDL.Vec(
-            IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)))
-          ),
-        ],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Tuple(Asset, IDL.Nat))))],
         ['query'],
       ),
     'getUserCreated' : IDL.Func([IDL.Principal], [IDL.Vec(Asset)], ['query']),

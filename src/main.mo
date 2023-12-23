@@ -41,8 +41,8 @@ actor class bodhi(
   stable var userAssets_entries: [(Principal, [Nat])] = [];
   let userAssets = TrieMap.fromEntries<Principal, [Nat]>(userAssets_entries.vals(), Principal.equal, Principal.hash);
 
-  stable var userBuyedAssets_entries: [(Principal, [(Nat, Nat)])] = [];
-  let userBuyedAssets = TrieMap.fromEntries<Principal, [(Nat, Nat)]>(userBuyedAssets_entries.vals(), Principal.equal, Principal.hash);
+  stable var userBuyedAssets_entries: [(Principal, [(Asset, Nat)])] = [];
+  let userBuyedAssets = TrieMap.fromEntries<Principal, [(Asset, Nat)]>(userBuyedAssets_entries.vals(), Principal.equal, Principal.hash);
 
   stable var fileKeyToAssetId_entries: [(Text, Nat)] = [];
   let fileKeyToAssetId = TrieMap.fromEntries<Text, Nat>(fileKeyToAssetId_entries.vals(), Text.equal, Text.hash);
@@ -106,8 +106,22 @@ actor class bodhi(
     Iter.toArray(assetIdToToken.entries())
   };
 
-  public query func getUserBuyedAssetsEntries(): async [(Principal, [(Nat, Nat)])] {
+  public query func getUserBuyedAssetsEntries(): async [(Principal, [(Asset, Nat)])] {
       Iter.toArray(userBuyedAssets.entries())
+  };
+
+  public query func getAsset(assetId: Nat): async ?Asset {
+    switch(assets.get(assetId)) {
+      case(null) null;
+      case(_asset) _asset;
+    }
+  };
+
+  public query func getTokenCanisterByAssetId(assetId: Nat): async ?Principal {
+    switch(assetIdToToken.get(assetId)) {
+      case(null) null;
+      case(?_token) ?_token.canisterId;
+    }
   };
 
   public query func getUserCreated(user: Principal): async [Asset] {
@@ -128,14 +142,16 @@ actor class bodhi(
     )
   };
 
-  // return [(asstdId, amount)]
-  public query func getUserBuyed(user: Principal): async [(Nat, Nat)] {
+  // return [(Asset, amount)]
+  // 用户买的资产 
+  public query func getUserBuyed(user: Principal): async [(Asset, Nat)] {
     switch(userBuyedAssets.get(user)) {
       case(null) [];
       case(?_buyedAssetArray) _buyedAssetArray
     }
   };
 
+  // 水龙头
   public shared func getWicp(user: Principal): async Result.Result<(), Error> {
     let wicp: ICRCActor = actor(Principal.toText(wicpCanisterId));
     switch((await wicp.icrc1_transfer({
@@ -164,7 +180,7 @@ actor class bodhi(
           case(?_fileKey) return #err(#AssetAlreadyCreated);
           case(null) {
             let newAssetId = ASSET_INDEX;
-            
+
             Cycles.add(T_CYCLES);
             let token = await Token.Token({
               name = "bodhi_ic_" # Nat.toText(newAssetId);
@@ -284,6 +300,9 @@ actor class bodhi(
     price - creatorFee
   };
 
+  // getBuyPriceAfterFee 查询付的钱
+  // 调wicp 转 bodhi_caniser, subAccount(Principal.toBlob(caller))
+  // amount 0.01 share = 0.01 * 1e18
   public shared({caller}) func buy(
     assetId: Nat,
     amount: Nat
@@ -382,34 +401,39 @@ actor class bodhi(
   };
 
   private func _putBuyed(user: Principal, assetId: Nat, amount: Nat) {
-    switch(userBuyedAssets.get(user)) {
-      case(null) {
-        userBuyedAssets.put(user, [(assetId, amount)]);
-      };
-      case(?_buyedAssetArray) {
-        switch(Array.find<(Nat, Nat)>(
-          _buyedAssetArray,
-          func (x: (Nat, Nat)): Bool {
-            x.0 == assetId
-          }
-        )) {
+    switch(assets.get(assetId)) {
+      case(null) return;
+      case(?_asset) {
+        switch(userBuyedAssets.get(user)) {
           case(null) {
-            userBuyedAssets.put(user, Array.append(_buyedAssetArray, [(assetId, amount)]))
+            userBuyedAssets.put(user, [(_asset, amount)]);
           };
-          case(?_oldAmount) {
-            let newUserBuyedAssetArray = 
-              Array.map<(Nat, Nat), (Nat, Nat)>(
-                _buyedAssetArray,
-                func (x: (Nat, Nat)): (Nat, Nat) {
-                  if(x.0 == assetId) (assetId, x.1 + amount)
-                  else (x.0, x.1)
-                }
-              );
-            userBuyedAssets.put(user, newUserBuyedAssetArray);
+          case(?_buyedAssetArray) {
+            switch(Array.find<(Asset, Nat)>(
+              _buyedAssetArray,
+              func (x: (Asset, Nat)): Bool {
+                x.0.id == assetId
+              }
+            )) {
+              case(null) {
+                userBuyedAssets.put(user, Array.append(_buyedAssetArray, [(_asset, amount)]))
+              };
+              case(?_oldAmount) {
+                let newUserBuyedAssetArray = 
+                  Array.map<(Asset, Nat), (Asset, Nat)>(
+                    _buyedAssetArray,
+                    func (x: (Asset, Nat)): (Asset, Nat) {
+                      if(x.0.id == assetId) (x.0, x.1 + amount)
+                      else (x.0, x.1)
+                    }
+                  );
+                userBuyedAssets.put(user, newUserBuyedAssetArray);
+              };
+            };
           };
         };
       };
-    }
+    };
   };
 
   // 考虑 icrc token 直接转移的情况
@@ -417,19 +441,19 @@ actor class bodhi(
     switch(userBuyedAssets.get(user)) {
       case(null) false;
       case(?_buyedAssetArray) {
-        switch(Array.find<(Nat, Nat)>(
+        switch(Array.find<(Asset, Nat)>(
           _buyedAssetArray,
-          func (x: (Nat, Nat)): Bool {
-            x.0 == assetId
+          func (x: (Asset, Nat)): Bool {
+            x.0.id == assetId
           }
         )) {
           case(null) false;
           case(?_oldAmount) {
             let newUserBuyedAssetArray = 
-              Array.map<(Nat, Nat), (Nat, Nat)>(
+              Array.map<(Asset, Nat), (Asset, Nat)>(
                 _buyedAssetArray,
-                func (x: (Nat, Nat)): (Nat, Nat) {
-                  if(x.0 == assetId) (assetId, x.1 - amount)
+                func (x: (Asset, Nat)): (Asset, Nat) {
+                  if(x.0.id == assetId) (x.0, x.1 - amount)
                   else (x.0, x.1)
                 }
               );
@@ -441,6 +465,10 @@ actor class bodhi(
     }
   };
 
+  // 得先获取 token 的 canister_id getTokenCanisterByAssetId
+  // getSellPriceAfterFee 获取 token 要转的amount
+  // 调token canister 转给 bodhi_caniser, sub(Principal.toBlob(caller))
+  // amount * 1e18
   public shared({caller}) func sell(
     assetId: Nat,
     amount: Nat
@@ -536,7 +564,7 @@ actor class bodhi(
     #ok(())
   };
 
-  // https://canisterId.icp0.io/filekey
+  // https://canisterId.raw.icp0.io/filekey
   public query func uri(id: Nat): async Text {
     switch(assets.get(id)) {
       case(null) return "https://" # Principal.toText(bucketCanisterId) #".icp0.io";
