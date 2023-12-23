@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from "./index.less"
 import {NewModal} from "../modals/newModal";
 import {useAuth} from "../../utils/useAuth";
 import {useNavigate} from "react-router-dom";
+import {sliceString} from "../../utils/common";
+import {bodhiApi} from "../../api/bodhi";
 
 export const Header = React.memo(() => {
   const navigate = useNavigate()
@@ -15,11 +17,11 @@ export const Header = React.memo(() => {
       BodHi - IC
     </div>
     <div style={{height: "100%", display: "flex", alignItems: "center", gap: "10px"}}>
-      <div onClick={() => setOpen(true)} className={styles.header_button}
-           style={{borderColor: "#C05522", color: "#C05522"}}>
+      {isAuth && <div onClick={() => setOpen(true)} className={styles.header_button}
+                      style={{borderColor: "#C05522", color: "#C05522"}}>
         + &nbsp;
         New
-      </div>
+      </div>}
       {isAuth ? <Account/> : <Connect/>}
     </div>
 
@@ -39,16 +41,57 @@ const Connect = React.memo(() => {
   </div>
 })
 
+
 const Account = React.memo(() => {
-  const {principal} = useAuth()
-  return <div className={styles.header_button}>
-    🌭
-    {principal?.toText().substring(0, 3) + "..." + principal?.toText().substring(principal?.toText().length - 3, principal?.toText().length)}
-    <span style={{height: "24px", width: "24px"}}>
+  const [isClick, setIsClick] = useState(false)
+  const {principal, logOut} = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    document.addEventListener("click", (e) => {
+      if (e.target) {
+        if ("id" in e.target) {
+          if (e.target.id !== "header_button") {
+            setIsClick(false)
+          }
+        }
+      }
+    })
+
+    return () => {
+      document.removeEventListener("click", () => {
+      })
+    }
+  }, [])
+
+  return <div style={{position: "relative"}}>
+    <div id={"header_button"} className={styles.header_button} onClick={() => setIsClick(true)}>
+      🌭
+      {sliceString(principal?.toText())}
+      <span style={{height: "24px", width: "24px"}}>
         <svg viewBox="0 0 24 24" focusable="false" className="chakra-icon css-onkibi" aria-hidden="true">
         <path fill="currentColor" d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"></path>
       </svg>
       </span>
+    </div>
+    <div className={styles.header_button_dropdown} style={{display: isClick ? "flex" : "none"}}>
+      <div style={{padding: "0 12px"}}>Balance:0.000ETH</div>
+      <div style={{
+        borderTop: "1px solid rgb(226, 232, 240)",
+        borderBottom: "1px solid rgb(226, 232, 240)",
+        padding: "6px 0"
+      }}>
+        <div className={styles.button} onClick={() => navigate(`/user/contents/${principal?.toText()}`)}>My Contents
+        </div>
+        <div style={{height: "10px"}}/>
+        <div className={styles.button} onClick={() => navigate(`/user/holdings/${principal?.toText()}`)}>My Holdings
+        </div>
+      </div>
+      <div onClick={() => {
+        logOut?.()
+      }} style={{color: "rgb(229, 62, 62)"}} className={styles.button}>Disconnect
+      </div>
+    </div>
   </div>
 })
 

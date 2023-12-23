@@ -3,7 +3,7 @@ import styles from "./index.less"
 import {marked} from "marked";
 import {AssetPanel} from "../assetPanel";
 import {useNavigate, useParams} from "react-router-dom";
-import {Skeleton} from 'antd';
+import {Skeleton, Tooltip} from 'antd';
 import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
 import {bodhiApi} from "../../api/bodhi";
 
@@ -68,8 +68,13 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset }) 
 
   return <div className={styles.content_wrap}>
     <div className={styles.content_header}>
-
-      <span>#{Number(asset?.id)} Created by 🌱 {actor}</span>
+      <span>#{Number(asset?.id)} Created by 🌱
+        <Tooltip
+          title={asset?.creator.toText()}>
+          &nbsp;
+          <span style={{cursor:"pointer"}} onClick={()=>navigate(`/user/contents/${asset?.creator.toText()}`)}>{actor}</span>
+      </Tooltip>
+      </span>
       <span style={{height: "24px", width: "24px"}}>
           <svg viewBox="0 0 24 24" focusable="false" className="chakra-icon css-onkibi" aria-hidden="true"><g
             fill="currentColor" stroke="currentColor" strokeLinecap="square" strokeWidth="2"><circle cx="12" cy="12"
