@@ -22,6 +22,7 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Nat,
     'creator' : IDL.Principal,
     'time' : Time,
+    'fileType' : IDL.Text,
     'tokenCanister' : IDL.Principal,
     'fileKey' : IDL.Text,
   });

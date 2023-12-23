@@ -199,6 +199,7 @@ actor class bodhi(
             assets.put(newAssetId, {
               id = newAssetId;
               fileKey = fileKey;
+              fileType = _asset.file_type;
               creator = caller;
               tokenCanister = Principal.fromActor(token);
               time = Time.now();

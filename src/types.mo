@@ -8,6 +8,7 @@ module {
     public type Asset = {
         id: Nat;
         fileKey: Text;
+        fileType: Text;
         creator: Principal;
         tokenCanister: Principal;
         time: Time.Time;
