@@ -2,13 +2,15 @@ import React, {useState} from 'react';
 import styles from "./index.less"
 import {NewModal} from "../modals/newModal";
 import {useAuth} from "../../utils/useAuth";
+import {useNavigate} from "react-router-dom";
 
 export const Header = React.memo(() => {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const {isAuth} = useAuth()
   return <div className={styles.header_wrap}>
     <NewModal setOpen={setOpen} open={open}/>
-    <div className={styles.header_left}>
+    <div className={styles.header_left} onClick={() => navigate("explore")}>
       <img height={30} width={30} src="https://bodhi.wtf/assets/bodhi-f8f8fb-180-faebd556.png" alt=""/>
       BodHi - IC
     </div>

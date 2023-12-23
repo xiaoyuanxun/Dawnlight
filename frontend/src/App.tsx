@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {Header} from "./components/header";
 import {Home} from "./components/content";
-import {UserPage} from "./components/user";
+import {Holding, MyContents, UserPage} from "./components/user";
 import {Explore} from "./components/explore";
 import {Routes, Route} from "react-router-dom";
 import {Assets} from "./components/assets";
@@ -23,7 +23,10 @@ function App() {
         <Route path={"/"} element={<Home/>}/>
         <Route path={"/:id"} element={<Home/>}/>
         <Route path={"explore"} element={<Explore/>}/>
-        <Route path={"address/:address"} element={<UserPage/>}/>
+        <Route path={"user"} element={<UserPage/>}>
+          <Route path={"contents/:address"} element={<MyContents/>}/>
+          <Route path={"holdings/:address"} element={<Holding/>}/>
+        </Route>
         {/*<Route path={"top"} element={<Assets/>}/>*/}
         <Route path={"editor"} element={<Editor/>}/>
         <Route path={"assets"} element={<Assets/>}/>

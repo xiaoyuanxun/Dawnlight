@@ -1,60 +1,109 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styles from "./index.less"
 import {Content} from "../content";
+import {Outlet, Route, Routes, useLocation, useNavigate, useParams} from "react-router-dom";
+import {Explore} from "../explore";
+import {sliceString, stringToPrincipal} from "../../utils/common";
+import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
+import {bodhiApi, shareAsset} from "../../api/bodhi";
+import {message} from "antd";
 
 export const UserPage = React.memo(() => {
-  const [tag, setTag] = useState(0)
+  const navigate = useNavigate()
+  const {address} = useParams()
+  const {pathname} = useLocation()
+  const tag = pathname.includes("contents") ? 0 : 1
   return <div>
     <div className={styles.user_wrap}>
       <div style={{margin: "20px 0"}}>
         <h2 style={{fontSize: "20px"}}>
           <span style={{marginRight: "10px", fontSize: "30px"}}>🌱</span>
-          <span>0xD1</span>
+          <span>{sliceString(address)}</span>
         </h2>
         <div style={{fontSize: "14px", color: "#8290A3"}}>
-          0xD10be77aD727ce32C85809a2ae8Ff4d86EbC068D
+          {address}
         </div>
       </div>
       <div>
-        <div className={tag === 0 ? styles.user_tag_1 : styles.user_tag_2} onClick={() => setTag(0)}>
+        <div className={tag === 0 ? styles.user_tag_1 : styles.user_tag_2}
+             onClick={() => navigate(`contents/${address}`)}>
           Contents
         </div>
-        <div className={tag === 1 ? styles.user_tag_1 : styles.user_tag_2} onClick={() => setTag(1)}>
+        <div className={tag === 1 ? styles.user_tag_1 : styles.user_tag_2}
+             onClick={() => navigate(`holdings/${address}`)}>
           Holdings
         </div>
       </div>
-      {
-        tag === 0
-          ?
-          <div style={{margin: "20px 0", display: "flex", flexDirection: 'column', gap: "20px"}}>
-            {/*<Content isHidden={true}/>*/}
-            {/*<Content isHidden={true}/>*/}
-          </div>
-          :
-          <div style={{marginTop: "28px"}}>
-            <div className={styles.table_head}>
-              <span>ASSET</span>
-              <span></span>
-              <span>SHARES</span>
-              <span>SHARE VALUE</span>
-            </div>
-            <Card/>
-            <Card/>
-            <Card/>
-          </div>
-      }
+      <Outlet/>
     </div>
   </div>
 })
 
-const Card = React.memo(() => {
+
+export const MyContents = React.memo(() => {
+  const [data, setData] = useState<Asset[]>()
+  const {address} = useParams()
+
+  const fetch = async () => {
+    try {
+      const principal = stringToPrincipal(address)
+      const res = await bodhiApi.getUserCreated(principal)
+      setData(res)
+    } catch (e) {
+      message.error("address error")
+    }
+  }
+
+  useEffect(() => {
+    fetch()
+  }, [])
+
+  return <div style={{margin: "20px 0", display: "flex", flexDirection: 'column', gap: "20px"}}>
+    {data?.map((v, k) => {
+      return <Content key={k} asset={v} isHidden={true}/>
+    })}
+  </div>
+})
+
+export const Holding = React.memo(() => {
+  const [data, setData] = useState<shareAsset[]>()
+  const {address} = useParams()
+
+  const fetch = async () => {
+    try {
+      const principal = stringToPrincipal(address)
+      const res = await bodhiApi.getUserBuyed(principal)
+      setData(res)
+    } catch (e) {
+      message.error("address error")
+    }
+  }
+
+  useEffect(() => {
+    fetch()
+  }, [])
+  return <div style={{marginTop: "28px"}}>
+    <div className={styles.table_head}>
+      <span>ASSET</span>
+      <span></span>
+      <span>SHARES</span>
+      <span>SHARE VALUE</span>
+    </div>
+    {data?.map((v, k) => {
+      return <Card asset={v} key={k}/>
+    })}
+  </div>
+})
+
+const Card = React.memo((props: { asset: shareAsset }) => {
+  const {asset} = props
   return <div className={styles.card_warp}>
-    <span style={{padding: "0"}}>#0</span>
+    <span style={{padding: "0"}}>#{Number(asset.id)}</span>
     <span>
           <img height={100} width={100} style={{borderRadius: "8px"}}
                src="https://thumbnail.bodhi.wtf/thumbnail/KFp-UgQquh0XoybFiWXOIbTJ6E8hs3LmPHFcZt69j-c" alt=""/>
     </span>
-    <span>6</span>
+    <span>{asset.share}</span>
     <span>6.92244 ETH ($15554.07)</span>
   </div>
 })
