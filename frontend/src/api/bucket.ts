@@ -3,6 +3,7 @@ import {getActor} from "../utils/Actor";
 import {idlFactory} from "../declarations/bucket/bucket.did.js"
 import {StoreArgs} from "../declarations/bucket/bucket";
 import {nanoid} from "nanoid"
+import {bodhiApi} from "./bodhi";
 
 const bucketId = "r4yar-zqaaa-aaaan-qlfja-cai"
 
@@ -16,8 +17,9 @@ export default class Bucket {
     const Data = new TextEncoder().encode(data)
     const actor = await Bucket.getActor()
     try {
+      const fileKey = nanoid()
       const arg: StoreArgs = {
-        key: "123",
+        key: fileKey,
         value: Data,
         total_index: BigInt(1),
         file_type: "text/plain",
@@ -25,6 +27,7 @@ export default class Bucket {
         index: BigInt(0)
       }
       await actor.store(arg)
+      await bodhiApi.create(fileKey)
     } catch (e) {
       console.log("store", e)
       throw e

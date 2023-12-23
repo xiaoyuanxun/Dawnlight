@@ -16,7 +16,7 @@ export const Explore = React.memo(() => {
     p: "top"
   }, {
     v: "All Assets",
-    p: ""
+    p: "assets"
   }, {
     v: "My Contents",
     p: ""

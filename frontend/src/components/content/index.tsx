@@ -2,12 +2,17 @@ import React, {useEffect, useRef, useState} from "react"
 import styles from "./index.less"
 import {marked} from "marked";
 import {AssetPanel} from "../assetPanel";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {Skeleton} from 'antd';
+import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
 
 export const Home = React.memo(() => {
+  const {id} = useParams()
+
+
+
   return <div style={{width: "100%"}}>
-    <Content isHidden={false} fileKey={"123"}/>
+    {/*<Content isHidden={false}/>*/}
     <div style={{height: "20px"}}/>
     <AssetPanel/>
     <div style={{height: "90px"}}/>
@@ -15,16 +20,21 @@ export const Home = React.memo(() => {
   </div>
 })
 
-export const Content = React.memo((props: { isHidden: boolean, fileKey?: string }) => {
-  const {isHidden, fileKey} = props
+export const Content = React.memo((props: { isHidden: boolean, asset: Asset }) => {
+  const {isHidden, asset} = props
   const ref = useRef<HTMLDivElement | null>(null)
   const [content, setContent] = useState<string>()
   const navigate = useNavigate()
 
+  const actor = React.useMemo(() => {
+    const principal = asset.creator.toText()
+    return principal.substring(0, 3) + "..." + principal.substring(principal.length - 3, principal.length)
+  }, [asset])
+
   const fetchData = async () => {
-    if (!fileKey) return
+    if (!asset) return
     try {
-      const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${fileKey}`)
+      const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
       const arraybuffer = await res.arrayBuffer()
       setTimeout(async () => {
         if (ref.current) {
@@ -38,12 +48,12 @@ export const Content = React.memo((props: { isHidden: boolean, fileKey?: string 
 
   useEffect(() => {
     fetchData()
-  }, [fileKey])
+  }, [asset])
 
   return <div className={styles.content_wrap}>
     <div className={styles.content_header}>
 
-      <span>#0 Created by 🌱 0xD1</span>
+      <span>#{Number(asset.id)} Created by 🌱 {actor}</span>
       <span style={{height: "24px", width: "24px"}}>
           <svg viewBox="0 0 24 24" focusable="false" className="chakra-icon css-onkibi" aria-hidden="true"><g
             fill="currentColor" stroke="currentColor" strokeLinecap="square" strokeWidth="2"><circle cx="12" cy="12"
