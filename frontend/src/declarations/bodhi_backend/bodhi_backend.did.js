@@ -19,7 +19,7 @@ export const idlFactory = ({ IDL }) => {
   const bodhi = IDL.Service({
     'buy' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'create' : IDL.Func([IDL.Text], [Result], []),
-    'getAssetIdsByPrincipal' : IDL.Func(
+    'getAssetIdsByPrincipal' : IDL.Func(x
         [IDL.Principal],
         [IDL.Opt(IDL.Vec(IDL.Nat))],
         ['query'],

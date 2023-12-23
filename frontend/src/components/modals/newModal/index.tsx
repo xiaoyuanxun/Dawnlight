@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {Modal} from 'antd';
 import styles from "./index.less"
+import {bucketApi} from "../../../api/bucket";
 
 export const NewModal = React.memo((props: { open: boolean, setOpen: Function }) => {
   const {open, setOpen} = props
@@ -64,11 +65,19 @@ const Step1 = React.memo((props: { setStep: Function }) => {
 })
 
 const Step2 = React.memo(() => {
+  const [value, setValue] = useState<string>("")
+
+  const handleClick = async () => {
+    await bucketApi.store(value)
+    console.log("ok")
+  }
   return <div className={styles.new_modal_content}>
-    <textarea placeholder={"Write something here.Markdown Supported"} name="" id="" rows={5}/>
+    <textarea onChange={(e: any) => setValue(e.target.value)} placeholder={"Write something here.Markdown Supported"}
+              name=""
+              id="" rows={5}/>
     <div className={styles.preview_wrap}>
       <a href={"/editor"}>Switch to Markdown Editor</a>
-      <span>Preview</span>
+      <span onClick={handleClick}>Upload</span>
     </div>
   </div>
 })
