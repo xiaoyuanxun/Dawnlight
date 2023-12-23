@@ -18,8 +18,12 @@ export const Home = React.memo(() => {
     }
     const b = Number(ID)
     if (isNaN(b)) return
-    const res = await bodhiApi.getAsset(b)
-    setData(res)
+    try {
+      const res = await bodhiApi.getAsset(b)
+      setData(res)
+    } catch (e) {
+      setData(undefined)
+    }
   }
 
   useEffect(() => {
@@ -49,12 +53,21 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   const fetchData = async () => {
     if (!asset) return
     try {
-      // const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
-      // const arraybuffer = await res.arrayBuffer()
+
       setTimeout(async () => {
         if (ref.current) {
-          // ref.current.innerHTML = await marked.parse(new TextDecoder().decode(arraybuffer))
-          ref.current.innerHTML = `<img width="520" height="520" src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}"/>`
+          let content: string = ""
+          const fileType = asset.fileType
+          if (fileType.includes("text")) {
+            const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
+            const arraybuffer = await res.arrayBuffer()
+            content = await marked.parse(new TextDecoder().decode(arraybuffer))
+          } else if (fileType.includes("image")) {
+            content = `<img  src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}"/>`
+          } else if (fileType.includes("video")) {
+            content = `<div style="display: flex;justify-content: center"> <video controls src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}" type="${asset.fileType}"/> <div/>`
+          }
+          ref.current.innerHTML = content
         }
       }, 0)
     } catch (e) {
