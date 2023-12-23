@@ -72,7 +72,8 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset }) 
         <Tooltip
           title={asset?.creator.toText()}>
           &nbsp;
-          <span style={{cursor:"pointer"}} onClick={()=>navigate(`/user/contents/${asset?.creator.toText()}`)}>{actor}</span>
+          <span style={{cursor: "pointer"}}
+                onClick={() => navigate(`/user/contents/${asset?.creator.toText()}`)}>{actor}</span>
       </Tooltip>
       </span>
       <span style={{height: "24px", width: "24px"}}>

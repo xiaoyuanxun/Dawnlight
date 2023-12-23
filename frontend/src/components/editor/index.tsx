@@ -2,9 +2,15 @@ import React from "react";
 import MDEditor from '@uiw/react-md-editor/nohighlight';
 import rehypeSanitize from "rehype-sanitize";
 import styles from "./index.less"
+import {bucketApi} from "../../api/bucket";
 
 export const Editor = React.memo(() => {
   const [value, setValue] = React.useState("");
+
+  const handleClick = async () => {
+    await bucketApi.store(value)
+    console.log("ok")
+  }
   return <div style={{padding: "0 8px"}}>
     <div data-color-mode="light">
       <MDEditor
@@ -17,7 +23,7 @@ export const Editor = React.memo(() => {
       />
     </div>
     <div className={styles.editor_footer}>
-      <span>Preview</span>
+      <span onClick={handleClick}>Upload</span>
     </div>
   </div>
 })
