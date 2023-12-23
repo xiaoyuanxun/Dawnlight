@@ -5,6 +5,7 @@ export interface Asset {
   'id' : bigint,
   'creator' : Principal,
   'time' : Time,
+  'fileType' : string,
   'tokenCanister' : Principal,
   'fileKey' : string,
 }

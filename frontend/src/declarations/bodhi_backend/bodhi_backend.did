@@ -90,6 +90,7 @@ type Asset =
  record {
    creator: principal;
    fileKey: text;
+   fileType: text;
    id: nat;
    time: Time;
    tokenCanister: principal;
