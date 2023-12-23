@@ -62,6 +62,7 @@ actor class bodhi(
     fileKeyToAssetId_entries := Iter.toArray(fileKeyToAssetId.entries());
     totalSupply_entries := Iter.toArray(totalSupply.entries());
     pool_entries := Iter.toArray(pool.entries());
+    assetIdToToken_entries := Iter.toArray(assetIdToToken.entries());
   };
 
   system func postupgrade() {
@@ -70,9 +71,34 @@ actor class bodhi(
     fileKeyToAssetId_entries := [];
     totalSupply_entries := [];
     pool_entries := [];
+    assetIdToToken_entries := [];
   };
 
-  public shared({caller}) func create(fileKey: Text): async Result.Result<(), Error> {
+  public query func getAssetsEntries(): async [(Nat, Asset)] {
+    Iter.toArray(assets.entries())
+  };
+
+  public query func getUserAssetsEntries(): async [(Principal, [Nat])] {
+    Iter.toArray(userAssets.entries())
+  };
+
+  public query func getFileKeyToAssetIdEntries(): async [(Text, Nat)] {
+    Iter.toArray(fileKeyToAssetId.entries())
+  };
+
+  public query func getTotalSupplyEntries(): async [(Nat, Nat)] {
+    Iter.toArray(totalSupply.entries())
+  };
+
+  public query func getPoolEntries(): async [(Nat, Nat)] {
+    Iter.toArray(pool.entries())
+  };
+
+  public query func getAssetIdToTokenEntries(): async [(Nat, TokenMetaData)] {
+    Iter.toArray(assetIdToToken.entries())
+  };
+
+  public shared({caller}) func create(fileKey: Text): async Result.Result<Principal, Error> {
     // 查询 Bucket 资产是否存在
     let bucket: BucketActor = actor(Principal.toText(bucketCanisterId));
     switch((await bucket.getFileAsset(fileKey))) {
@@ -82,6 +108,21 @@ actor class bodhi(
           case(?_fileKey) return #err(#AssetAlreadyCreated);
           case(null) {
             let newAssetId = assetIndex;
+            Cycles.add(T_CYCLES);
+            let token = await Token.Token({
+              name = "bodhi_ic_" # Nat.toText(newAssetId);
+              symbol = "bodhi_ic_" # Nat.toText(newAssetId);
+              decimals = 8;
+              fee = TOKEN_FEE;
+              max_supply = CREATOR_PREMINT;
+              initial_balances = [({
+                owner = caller;
+                subaccount = null;
+              },CREATOR_PREMINT)];
+              min_burn_amount = TOKEN_FEE;
+              minting_account = null;
+              advanced_settings = null;
+            });
             assets.put(newAssetId, {
               id = newAssetId;
               fileKey = fileKey;
@@ -98,21 +139,7 @@ actor class bodhi(
             fileKeyToAssetId.put(fileKey, newAssetId);
             totalSupply.put(newAssetId, CREATOR_PREMINT);
             assetIndex += 1;
-            Cycles.add(T_CYCLES);
-            let token = await Token.Token({
-              name = "bodhi_ic_" # Nat.toText(newAssetId);
-              symbol = "bodhi_ic_" # Nat.toText(newAssetId);
-              decimals = 8;
-              fee = TOKEN_FEE;
-              max_supply = CREATOR_PREMINT;
-              initial_balances = [({
-                owner = caller;
-                subaccount = null;
-              },CREATOR_PREMINT)];
-              min_burn_amount = TOKEN_FEE;
-              minting_account = null;
-              advanced_settings = null;
-            });
+
             assetIdToToken.put(newAssetId, {
               assetId = newAssetId;
               canisterId = Principal.fromActor(token);
@@ -120,7 +147,7 @@ actor class bodhi(
             });
             CreateEvent := Array.append(CreateEvent, [(newAssetId, caller, fileKey)]);
             TradeEvent := Array.append(TradeEvent, [(#Mint, newAssetId, caller, CREATOR_PREMINT, 0, 0)]);
-            #ok(())
+            #ok(Principal.fromActor(token))
           };
         };
       };
