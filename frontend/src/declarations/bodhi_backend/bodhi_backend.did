@@ -1,16 +1,51 @@
 type bodhi = 
  service {
    buy: (nat, nat) -> (Result);
-   create: (text) -> (Result);
+   create: (text) -> (Result_1);
+   getAssetIdToTokenEntries: () -> (vec record {
+                                          nat;
+                                          TokenMetaData;
+                                        }) query;
    getAssetIdsByPrincipal: (principal) -> (opt vec nat) query;
+   getAssetsEntries: () -> (vec record {
+                                  nat;
+                                  Asset;
+                                }) query;
    getBuyPrice: (nat, nat) -> (nat) query;
    getBuyPriceAfterFee: (nat, nat) -> (nat) query;
+   getFileKeyToAssetIdEntries: () -> (vec record {
+                                            text;
+                                            nat;
+                                          }) query;
+   getPoolEntries: () -> (vec record {
+                                nat;
+                                nat;
+                              }) query;
    getPrice: (nat, nat) -> (nat) query;
    getSellPrice: (nat, nat) -> (nat) query;
    getSellPriceAfterFee: (nat, nat) -> (nat) query;
+   getTotalSupplyEntries: () -> (vec record {
+                                       nat;
+                                       nat;
+                                     }) query;
+   getUserAssetsEntries: () -> (vec record {
+                                      principal;
+                                      vec nat;
+                                    }) query;
    remove: (nat) -> (Result);
    sell: (nat, nat) -> (Result);
    uri: (nat) -> (text) query;
+ };
+type TokenMetaData = 
+ record {
+   assetId: nat;
+   canisterId: principal;
+   creator: principal;
+ };
+type Result_1 = 
+ variant {
+   err: Error;
+   ok: principal;
  };
 type Result = 
  variant {
@@ -33,5 +68,11 @@ type Error =
    TransferToSellAccountError;
    Unauthorized;
    UnknowError;
+ };
+type Asset = 
+ record {
+   creator: principal;
+   fileKey: text;
+   id: nat;
  };
 service : (principal, principal) -> bodhi

@@ -16,7 +16,9 @@ import HttpHandler "httpHandler";
 import HashMap "mo:base/HashMap";
 import Prim "mo:⛔";
 import Int64 "mo:base/Int64";
+import Time "mo:base/Time";
 import Utils "utils";
+import Order "mo:base/Order";
 
 shared(installer) actor class Bucket() = this{
     private type Status                 = Types.Status;
@@ -48,6 +50,37 @@ shared(installer) actor class Bucket() = this{
     private var buffer = TrieMap.TrieMap<Text, BufferArgs>(Text.equal, Text.hash); 
     private var logs : TrieMap.TrieMap<Nat, Status> = TrieMap.fromEntries<Nat, Status>(logs_entries.vals(), Nat.equal, hash.hash);
     
+    public query func getRecentFileAsset(): async [FileAsset] {
+        Iter.toArray<FileAsset>(
+            Iter.sort<FileAsset>(
+                assets.vals(),
+                func (x: FileAsset, y: FileAsset): Order.Order {
+                    if(x.time > y.time) #less
+                    else if(x.time == y.time) #equal
+                    else #greater
+                }
+            )
+        )
+    };
+
+    public query func getUserRecentFileAsset(user: Principal): async [FileAsset] {
+        Iter.toArray<FileAsset>(
+            Iter.sort<FileAsset>(
+                Iter.filter<FileAsset>(
+                    assets.vals(),
+                    func (x: FileAsset): Bool {
+                        x.owner == user
+                    }
+                ),
+                func (x: FileAsset, y: FileAsset): Order.Order {
+                    if(x.time > y.time) #less
+                    else if(x.time == y.time) #equal
+                    else #greater
+                }
+            )
+        )
+    };
+
     public query func getCycleBalance(): async Nat {
         Cycles.balance()
     };
@@ -206,10 +239,12 @@ shared(installer) actor class Bucket() = this{
                                      
                     if (buf.received == buf.total_index) {
                         assets.put(args.key, {
+                            key = args.key;
                             read_page_field = buf.read_page_field;
                             file_type = args.file_type;
                             total_size = args.total_size;
                             owner = owner;
+                            time = Time.now();
                         });
                         buffer.delete(args.key);
                     };
@@ -726,10 +761,12 @@ shared(installer) actor class Bucket() = this{
 
     system func preupgrade() {
         let fs: FileAsset = {
+            key = "";
             read_page_field = [];
             file_type = "";
             total_size = 0;
             owner = Principal.fromText("2vxsx-fae");
+            time = 0;
         };
         assets_entries := Array.init<(Text, FileAsset)>(assets.size(), ("", fs));
         var assets_index = 0;

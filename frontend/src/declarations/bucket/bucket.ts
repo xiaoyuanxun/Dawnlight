@@ -7,6 +7,8 @@ export interface Bucket {
   'getCycleBalance' : ActorMethod<[], bigint>,
   'getFileAsset' : ActorMethod<[string], [] | [FileAsset]>,
   'getFileTotalIndex' : ActorMethod<[string], bigint>,
+  'getRecentFileAsset' : ActorMethod<[], Array<FileAsset>>,
+  'getUserRecentFileAsset' : ActorMethod<[Principal], Array<FileAsset>>,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
   'store' : ActorMethod<[StoreArgs], undefined>,
   'streamingCallback' : ActorMethod<
@@ -26,7 +28,9 @@ export interface CallbackToken__1 {
   'index' : bigint,
 }
 export interface FileAsset {
+  'key' : string,
   'owner' : Principal,
+  'time' : Time,
   'file_type' : string,
   'total_size' : bigint,
   'read_page_field' : Array<[bigint, bigint]>,
@@ -66,4 +70,5 @@ export interface StreamingCallbackHttpResponse__1 {
   'token' : [] | [CallbackToken__1],
   'body' : Uint8Array | number[],
 }
+export type Time = bigint;
 export interface _SERVICE extends Bucket {}

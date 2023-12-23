@@ -1,6 +1,9 @@
 export const idlFactory = ({ IDL }) => {
+  const Time = IDL.Int;
   const FileAsset = IDL.Record({
+    'key' : IDL.Text,
     'owner' : IDL.Principal,
+    'time' : Time,
     'file_type' : IDL.Text,
     'total_size' : IDL.Nat64,
     'read_page_field' : IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Nat64)),
@@ -64,6 +67,12 @@ export const idlFactory = ({ IDL }) => {
     'getCycleBalance' : IDL.Func([], [IDL.Nat], ['query']),
     'getFileAsset' : IDL.Func([IDL.Text], [IDL.Opt(FileAsset)], ['query']),
     'getFileTotalIndex' : IDL.Func([IDL.Text], [IDL.Nat], ['query']),
+    'getRecentFileAsset' : IDL.Func([], [IDL.Vec(FileAsset)], ['query']),
+    'getUserRecentFileAsset' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(FileAsset)],
+        ['query'],
+      ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
     'store' : IDL.Func([StoreArgs], [], []),
     'streamingCallback' : IDL.Func(

@@ -1,3 +1,4 @@
+type Time = int;
 type StreamingCallbackHttpResponse__1 = 
  record {
    body: blob;
@@ -47,11 +48,13 @@ type HeaderField =
 type FileAsset = 
  record {
    file_type: text;
+   key: text;
    owner: principal;
    read_page_field: vec record {
                           nat64;
                           nat64;
                         };
+   time: Time;
    total_size: nat64;
  };
 type CallbackToken__1 = 
@@ -76,6 +79,8 @@ type Bucket =
    getCycleBalance: () -> (nat) query;
    getFileAsset: (text) -> (opt FileAsset) query;
    getFileTotalIndex: (text) -> (nat) query;
+   getRecentFileAsset: () -> (vec FileAsset) query;
+   getUserRecentFileAsset: (principal) -> (vec FileAsset) query;
    http_request: (HttpRequest) -> (HttpResponse) query;
    store: (StoreArgs) -> ();
    streamingCallback: (CallbackToken) ->
