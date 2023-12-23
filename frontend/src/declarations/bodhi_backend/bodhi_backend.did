@@ -2,6 +2,7 @@ type bodhi =
  service {
    buy: (nat, nat) -> (Result);
    create: (text) -> (Result_1);
+   getAsset: (nat) -> (opt Asset) query;
    getAssetIdToTokenEntries: () -> (vec record {
                                           nat;
                                           TokenMetaData;
@@ -24,6 +25,7 @@ type bodhi =
    getPrice: (nat, nat) -> (nat) query;
    getSellPrice: (nat, nat) -> (nat) query;
    getSellPriceAfterFee: (nat, nat) -> (nat) query;
+   getTokenCanisterByAssetId: (nat) -> (opt principal) query;
    getTotalSupplyEntries: () -> (vec record {
                                        nat;
                                        nat;
@@ -33,14 +35,14 @@ type bodhi =
                                       vec nat;
                                     }) query;
    getUserBuyed: (principal) -> (vec record {
-                                       nat;
+                                       Asset;
                                        nat;
                                      }) query;
    getUserBuyedAssetsEntries: () ->
     (vec record {
            principal;
            vec record {
-                 nat;
+                 Asset;
                  nat;
                };
          }) query;
