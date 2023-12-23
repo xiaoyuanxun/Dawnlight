@@ -4,6 +4,8 @@ import type { ActorMethod } from '@dfinity/agent';
 export interface Asset {
   'id' : bigint,
   'creator' : Principal,
+  'time' : Time,
+  'tokenCanister' : Principal,
   'fileKey' : string,
 }
 export type Error = { 'BurnError' : null } |
@@ -24,6 +26,7 @@ export type Result = { 'ok' : null } |
   { 'err' : Error };
 export type Result_1 = { 'ok' : Principal } |
   { 'err' : Error };
+export type Time = bigint;
 export interface TokenMetaData {
   'creator' : Principal,
   'assetId' : bigint,
@@ -44,6 +47,13 @@ export interface bodhi {
   'getSellPriceAfterFee' : ActorMethod<[bigint, bigint], bigint>,
   'getTotalSupplyEntries' : ActorMethod<[], Array<[bigint, bigint]>>,
   'getUserAssetsEntries' : ActorMethod<[], Array<[Principal, Array<bigint>]>>,
+  'getUserBuyed' : ActorMethod<[Principal], Array<[bigint, bigint]>>,
+  'getUserBuyedAssetsEntries' : ActorMethod<
+    [],
+    Array<[Principal, Array<[bigint, bigint]>]>
+  >,
+  'getUserCreated' : ActorMethod<[Principal], Array<Asset>>,
+  'getWicp' : ActorMethod<[Principal], Result>,
   'remove' : ActorMethod<[bigint], Result>,
   'sell' : ActorMethod<[bigint, bigint], Result>,
   'uri' : ActorMethod<[bigint], string>,

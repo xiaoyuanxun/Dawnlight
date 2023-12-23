@@ -10,6 +10,8 @@ import Array "mo:base/Array";
 import Cycles "mo:base/ExperimentalCycles";
 import Token "icrc/token";
 import Buffer "mo:base/Buffer";
+import Time "mo:base/Time";
+import Order "mo:base/Order";
 
 actor class bodhi(
   _bucketCanisterId: Principal,
@@ -25,7 +27,7 @@ actor class bodhi(
 
   stable var bucketCanisterId = _bucketCanisterId;
   stable var wicpCanisterId = _wicpCanisterId;
-  stable var assetIndex: Nat = 0;
+  stable var ASSET_INDEX: Nat = 0;
   
   stable var CreateEvent: [(Nat, Principal, Text)] = []; // (assetId, sender, fileKey)
   stable var RemoveEvent: [(Nat, Principal)] = []; // (assetId, sender)
@@ -39,6 +41,9 @@ actor class bodhi(
   stable var userAssets_entries: [(Principal, [Nat])] = [];
   let userAssets = TrieMap.fromEntries<Principal, [Nat]>(userAssets_entries.vals(), Principal.equal, Principal.hash);
 
+  stable var userBuyedAssets_entries: [(Principal, [(Nat, Nat)])] = [];
+  let userBuyedAssets = TrieMap.fromEntries<Principal, [(Nat, Nat)]>(userBuyedAssets_entries.vals(), Principal.equal, Principal.hash);
+
   stable var fileKeyToAssetId_entries: [(Text, Nat)] = [];
   let fileKeyToAssetId = TrieMap.fromEntries<Text, Nat>(fileKeyToAssetId_entries.vals(), Text.equal, Text.hash);
 
@@ -51,10 +56,11 @@ actor class bodhi(
   stable var assetIdToToken_entries: [(Nat, TokenMetaData)] = [];
   let assetIdToToken = TrieMap.fromEntries<Nat, TokenMetaData>(assetIdToToken_entries.vals(), Nat.equal, Hash.hash);
 
-  stable let CREATOR_PREMINT = 1_000_000_000_000_000_000; // 1e18
-  stable let CREATOR_FEE_PERCENT = 50_000_000_000_000_000; // 5%
-  stable let T_CYCLES = 1_000_000_000_000; // 1e12 = 1 T Cycles
-  stable let TOKEN_FEE = 10_000;
+  stable let CREATOR_PREMINT: Nat = 1_000_000_000_000_000_000; // 1e18
+  stable let CREATOR_FEE_PERCENT: Nat = 50_000_000_000_000_000; // 5%
+  stable let DECIMALS: Nat = 100_000_000; // 1e8
+  stable let T_CYCLES: Nat = 1_000_000_000_000; // 1e12 = 1 T Cycles
+  stable let TOKEN_FEE: Nat = 10_000;
 
   system func preupgrade() {
     assets_entries := Iter.toArray(assets.entries());
@@ -63,6 +69,7 @@ actor class bodhi(
     totalSupply_entries := Iter.toArray(totalSupply.entries());
     pool_entries := Iter.toArray(pool.entries());
     assetIdToToken_entries := Iter.toArray(assetIdToToken.entries());
+    userBuyedAssets_entries := Iter.toArray(userBuyedAssets.entries());
   };
 
   system func postupgrade() {
@@ -72,6 +79,7 @@ actor class bodhi(
     totalSupply_entries := [];
     pool_entries := [];
     assetIdToToken_entries := [];
+    userBuyedAssets_entries := [];
   };
 
   public query func getAssetsEntries(): async [(Nat, Asset)] {
@@ -98,6 +106,54 @@ actor class bodhi(
     Iter.toArray(assetIdToToken.entries())
   };
 
+  public query func getUserBuyedAssetsEntries(): async [(Principal, [(Nat, Nat)])] {
+      Iter.toArray(userBuyedAssets.entries())
+  };
+
+  public query func getUserCreated(user: Principal): async [Asset] {
+    Iter.toArray<Asset>(
+      Iter.sort<Asset>(
+        Iter.filter<Asset>(
+          assets.vals(),
+          func (x: Asset): Bool {
+              x.creator == user
+          } 
+        ),
+        func (x: Asset, y: Asset): Order.Order {
+            if(x.time > y.time) #less
+            else if(x.time == y.time) #equal
+            else #greater
+        }  
+      )
+    )
+  };
+
+  // return [(asstdId, amount)]
+  public query func getUserBuyed(user: Principal): async [(Nat, Nat)] {
+    switch(userBuyedAssets.get(user)) {
+      case(null) [];
+      case(?_buyedAssetArray) _buyedAssetArray
+    }
+  };
+
+  public shared func getWicp(user: Principal): async Result.Result<(), Error> {
+    let wicp: ICRCActor = actor(Principal.toText(wicpCanisterId));
+    switch((await wicp.icrc1_transfer({
+      from_subaccount = null;
+      to = {
+        owner = user;
+        subaccount = null;
+      };
+      amount = 100 * DECIMALS;
+      fee = null;
+      memo = null;
+      created_at_time = null;
+    }))) {
+      case(#Err(_)) return #err(#TransferToMainAccountError);
+      case(#Ok(_)) #ok(())
+    };
+  };
+
   public shared({caller}) func create(fileKey: Text): async Result.Result<Principal, Error> {
     // 查询 Bucket 资产是否存在
     let bucket: BucketActor = actor(Principal.toText(bucketCanisterId));
@@ -107,7 +163,8 @@ actor class bodhi(
         switch(fileKeyToAssetId.get(fileKey)) {
           case(?_fileKey) return #err(#AssetAlreadyCreated);
           case(null) {
-            let newAssetId = assetIndex;
+            let newAssetId = ASSET_INDEX;
+            
             Cycles.add(T_CYCLES);
             let token = await Token.Token({
               name = "bodhi_ic_" # Nat.toText(newAssetId);
@@ -127,6 +184,8 @@ actor class bodhi(
               id = newAssetId;
               fileKey = fileKey;
               creator = caller;
+              tokenCanister = Principal.fromActor(token);
+              time = Time.now();
             });
             switch(userAssets.get(caller)) {
               case(null) {
@@ -138,7 +197,7 @@ actor class bodhi(
             };
             fileKeyToAssetId.put(fileKey, newAssetId);
             totalSupply.put(newAssetId, CREATOR_PREMINT);
-            assetIndex += 1;
+            ASSET_INDEX += 1;
 
             assetIdToToken.put(newAssetId, {
               assetId = newAssetId;
@@ -229,7 +288,7 @@ actor class bodhi(
     assetId: Nat,
     amount: Nat
   ): async Result.Result<(), Error> {
-    if(assetId >= assetIndex) return #err(#AssetNotExist);
+    if(assetId >= ASSET_INDEX) return #err(#AssetNotExist);
     let price = _getBuyPrice(assetId, amount);
     let creatorFee = (price * CREATOR_FEE_PERCENT) / CREATOR_PREMINT;
     let wicp: ICRCActor = actor(Principal.toText(wicpCanisterId));
@@ -274,6 +333,7 @@ actor class bodhi(
       };
     };
 
+    // Mint Token
     switch(assetIdToToken.get(assetId)) {
       case(null) return #err(#UnknowError);
       case(?_tokenMetaData) {
@@ -295,10 +355,10 @@ actor class bodhi(
 
     TradeEvent := Array.append(TradeEvent, [(#Buy, assetId, caller, amount, price, creatorFee)]);
 
+    // 支付创作者费用
     switch(assets.get(assetId)) {
       case(null) return #err(#UnknowError);
       case(?_asset) {
-        // 转创作者
         switch((await wicp.icrc1_transfer({
           from_subaccount = null;
           to = {
@@ -316,14 +376,76 @@ actor class bodhi(
       }
     };
 
+    _putBuyed(caller, assetId, amount);
+
     #ok(())
+  };
+
+  private func _putBuyed(user: Principal, assetId: Nat, amount: Nat) {
+    switch(userBuyedAssets.get(user)) {
+      case(null) {
+        userBuyedAssets.put(user, [(assetId, amount)]);
+      };
+      case(?_buyedAssetArray) {
+        switch(Array.find<(Nat, Nat)>(
+          _buyedAssetArray,
+          func (x: (Nat, Nat)): Bool {
+            x.0 == assetId
+          }
+        )) {
+          case(null) {
+            userBuyedAssets.put(user, Array.append(_buyedAssetArray, [(assetId, amount)]))
+          };
+          case(?_oldAmount) {
+            let newUserBuyedAssetArray = 
+              Array.map<(Nat, Nat), (Nat, Nat)>(
+                _buyedAssetArray,
+                func (x: (Nat, Nat)): (Nat, Nat) {
+                  if(x.0 == assetId) (assetId, x.1 + amount)
+                  else (x.0, x.1)
+                }
+              );
+            userBuyedAssets.put(user, newUserBuyedAssetArray);
+          };
+        };
+      };
+    }
+  };
+
+  // 考虑 icrc token 直接转移的情况
+  private func _removeBuyed(user: Principal, assetId: Nat, amount: Nat): Bool {
+    switch(userBuyedAssets.get(user)) {
+      case(null) false;
+      case(?_buyedAssetArray) {
+        switch(Array.find<(Nat, Nat)>(
+          _buyedAssetArray,
+          func (x: (Nat, Nat)): Bool {
+            x.0 == assetId
+          }
+        )) {
+          case(null) false;
+          case(?_oldAmount) {
+            let newUserBuyedAssetArray = 
+              Array.map<(Nat, Nat), (Nat, Nat)>(
+                _buyedAssetArray,
+                func (x: (Nat, Nat)): (Nat, Nat) {
+                  if(x.0 == assetId) (assetId, x.1 - amount)
+                  else (x.0, x.1)
+                }
+              );
+            userBuyedAssets.put(user, newUserBuyedAssetArray);
+            true
+          };
+        };
+      }
+    }
   };
 
   public shared({caller}) func sell(
     assetId: Nat,
     amount: Nat
   ): async Result.Result<(), Error> {
-    if(assetId >= assetIndex) return #err(#AssetNotExist);
+    if(assetId >= ASSET_INDEX) return #err(#AssetNotExist);
     switch(assetIdToToken.get(assetId)) {
       case(null) return #err(#TokenOfAssetNotExist);
       case(?_tokenMetaData) {
@@ -350,6 +472,8 @@ actor class bodhi(
               case(#Err(_)) return #err(#BurnError);
               case(#Ok(_)) { };
             };
+
+            ignore _removeBuyed(caller, assetId, amount);
 
             totalSupply.put(assetId, _supply - amount);
           };

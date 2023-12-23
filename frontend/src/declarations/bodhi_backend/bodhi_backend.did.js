@@ -22,9 +22,12 @@ export const idlFactory = ({ IDL }) => {
     'assetId' : IDL.Nat,
     'canisterId' : IDL.Principal,
   });
+  const Time = IDL.Int;
   const Asset = IDL.Record({
     'id' : IDL.Nat,
     'creator' : IDL.Principal,
+    'time' : Time,
+    'tokenCanister' : IDL.Principal,
     'fileKey' : IDL.Text,
   });
   const bodhi = IDL.Service({
@@ -70,6 +73,22 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Nat)))],
         ['query'],
       ),
+    'getUserBuyed' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))],
+        ['query'],
+      ),
+    'getUserBuyedAssetsEntries' : IDL.Func(
+        [],
+        [
+          IDL.Vec(
+            IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat)))
+          ),
+        ],
+        ['query'],
+      ),
+    'getUserCreated' : IDL.Func([IDL.Principal], [IDL.Vec(Asset)], ['query']),
+    'getWicp' : IDL.Func([IDL.Principal], [Result], []),
     'remove' : IDL.Func([IDL.Nat], [Result], []),
     'sell' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'uri' : IDL.Func([IDL.Nat], [IDL.Text], ['query']),

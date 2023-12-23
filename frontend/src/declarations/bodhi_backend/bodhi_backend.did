@@ -32,6 +32,20 @@ type bodhi =
                                       principal;
                                       vec nat;
                                     }) query;
+   getUserBuyed: (principal) -> (vec record {
+                                       nat;
+                                       nat;
+                                     }) query;
+   getUserBuyedAssetsEntries: () ->
+    (vec record {
+           principal;
+           vec record {
+                 nat;
+                 nat;
+               };
+         }) query;
+   getUserCreated: (principal) -> (vec Asset) query;
+   getWicp: (principal) -> (Result);
    remove: (nat) -> (Result);
    sell: (nat, nat) -> (Result);
    uri: (nat) -> (text) query;
@@ -42,6 +56,7 @@ type TokenMetaData =
    canisterId: principal;
    creator: principal;
  };
+type Time = int;
 type Result_1 = 
  variant {
    err: Error;
@@ -74,5 +89,7 @@ type Asset =
    creator: principal;
    fileKey: text;
    id: nat;
+   time: Time;
+   tokenCanister: principal;
  };
 service : (principal, principal) -> bodhi

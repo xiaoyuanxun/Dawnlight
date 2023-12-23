@@ -1,4 +1,5 @@
 import Principal "mo:base/Principal";
+import Time "mo:base/Time";
 import BucketTypes "storage/types";
 import ICRCTypes "icrc/types";
 
@@ -8,6 +9,8 @@ module {
         id: Nat;
         fileKey: Text;
         creator: Principal;
+        tokenCanister: Principal;
+        time: Time.Time;
     };
 
     public type TradeType = {
