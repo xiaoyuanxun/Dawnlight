@@ -5,6 +5,11 @@ import {useAuth} from "../../utils/useAuth";
 import {useNavigate} from "react-router-dom";
 import {sliceString} from "../../utils/common";
 import {bodhiApi} from "../../api/bodhi";
+import { icrcApi } from '../../api/icrc';
+import { Principal } from '@dfinity/candid/lib/cjs/idl';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
+const wicp_canister_id = "gttsv-dqaaa-aaaan-qlgva-cai";
 
 export const Header = React.memo(() => {
   const navigate = useNavigate()
@@ -46,8 +51,25 @@ const Account = React.memo(() => {
   const [isClick, setIsClick] = useState(false)
   const {principal, logOut} = useAuth()
   const navigate = useNavigate()
+  const [icpBalance, setICPBalance] = useState(0)
+
+  const initUserICPBalance = async () => {
+    if(principal != undefined) {
+      const userICPBalance = await icrcApi(wicp_canister_id).icrc1_balance_of({
+        owner: principal,
+        subaccount: []
+      });
+      setICPBalance(Number(userICPBalance / BigInt(1e8)))
+    }
+  };
+
+  const handleClaimICP = async () => {
+    
+  }
 
   useEffect(() => {
+    initUserICPBalance()
+    // console.log(principal?.toString())
     document.addEventListener("click", (e) => {
       if (e.target) {
         if ("id" in e.target) {
@@ -62,7 +84,7 @@ const Account = React.memo(() => {
       document.removeEventListener("click", () => {
       })
     }
-  }, [])
+  }, [principal])
 
   return <div style={{position: "relative"}}>
     <div id={"header_button"} className={styles.header_button} onClick={() => setIsClick(true)}>
@@ -75,12 +97,20 @@ const Account = React.memo(() => {
       </span>
     </div>
     <div className={styles.header_button_dropdown} style={{display: isClick ? "flex" : "none"}}>
-      <div style={{padding: "0 12px"}}>Balance:0.000ETH</div>
+      <div style={{padding: "0 12px"}}>Balance: {icpBalance} ICP</div>
       <div style={{
         borderTop: "1px solid rgb(226, 232, 240)",
         borderBottom: "1px solid rgb(226, 232, 240)",
         padding: "6px 0"
       }}>
+        <CopyToClipboard text={principal == undefined ? "Not have principal" : principal.toString()}>
+          <div className={styles.button}>My Principal
+          </div>
+        </CopyToClipboard>
+        <div style={{height: "10px"}}/>
+        <div className={styles.button} onClick={handleClaimICP}>Claim Test ICP
+        </div>
+        <div style={{height: "10px"}}/>
         <div className={styles.button} onClick={() => navigate(`/user/contents/${principal?.toText()}`)}>My Contents
         </div>
         <div style={{height: "10px"}}/>

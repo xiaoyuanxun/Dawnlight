@@ -50,6 +50,14 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
     return principal.substring(0, 3) + "..." + principal.substring(principal.length - 3, principal.length)
   }, [asset])
 
+  const handleBuy = async () => {
+
+  };
+
+  const handleSell = async () => {
+
+  };
+  
   const fetchData = async () => {
     if (!asset) return
     try {
@@ -113,8 +121,12 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
         <span style={{fontSize: "14px", fontWeight: "300"}}> 0.17779 ETH / Share</span>
       </div>
       <div className={styles.content_footer_right}>
-        <div className={styles.content_footer_right_button_1}>Buy</div>
-        <div className={styles.content_footer_right_button_2}>Sell</div>
+        <div className={styles.content_footer_right_button_1} onClick={handleBuy}>
+          Buy
+        </div>
+        <div className={styles.content_footer_right_button_2} onClick={handleSell}>
+          Sell
+        </div>
       </div>
     </div>
   </div>

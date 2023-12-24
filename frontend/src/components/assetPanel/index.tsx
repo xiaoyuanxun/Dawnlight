@@ -8,7 +8,7 @@ const Trades = React.memo(() => {
         <span>🛁</span>
         <span>0x8d</span>
         <span className={styles.panel_item_tag}>SOLD</span>
-        <span> 0.03 share for 0.03600 ETH</span>
+        <span> 0.03 share for 3.60 ICP</span>
       </div>
     })}
   </>
