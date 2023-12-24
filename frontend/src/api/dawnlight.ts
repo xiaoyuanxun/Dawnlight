@@ -1,6 +1,6 @@
-import {idlFactory} from "../declarations/bodhi_backend/bodhi_backend.did.js";
+import {idlFactory} from "../declarations/Dawnlight_backend/Dawnlight_backend.did.js";
 import {getActor} from "../utils/Actor";
-import {Asset, Result_1} from "../declarations/bodhi_backend/bodhi_backend";
+import {Asset, Result_1} from "../declarations/Dawnlight_backend/Dawnlight_backend.js";
 import {Principal} from "@dfinity/principal";
 
 const bodhi_cai = "g5r75-yaaaa-aaaan-qlgua-cai"

@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import styles from "./index.less"
 import {Content} from "../content";
-import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
-import {bodhiApi} from "../../api/bodhi";
+import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
+import {bodhiApi} from "../../api/dawnlight";
 
 export const Assets = React.memo(() => {
   const [data, setData] = useState<Asset[]>()

@@ -12,8 +12,9 @@ import Token "icrc/token";
 import Buffer "mo:base/Buffer";
 import Time "mo:base/Time";
 import Order "mo:base/Order";
+import {ic} "mo:ic";
 
-actor class bodhi(
+actor class Dawnlight(
   _bucketCanisterId: Principal,
   _wicpCanisterId: Principal
 ) = this {
@@ -56,8 +57,8 @@ actor class bodhi(
   stable var assetIdToToken_entries: [(Nat, TokenMetaData)] = [];
   let assetIdToToken = TrieMap.fromEntries<Nat, TokenMetaData>(assetIdToToken_entries.vals(), Nat.equal, Hash.hash);
 
-  stable let CREATOR_PREMINT: Nat = 1_000_000_000_000_000_000; // 1e18
-  stable let CREATOR_FEE_PERCENT: Nat = 50_000_000_000_000_000; // 5%
+  stable var CREATOR_PREMINT: Nat = 100_000_000; // 1e8
+  stable var CREATOR_FEE_PERCENT: Nat = 5_000_000; // 5%
   stable let DECIMALS: Nat = 100_000_000; // 1e8
   stable let T_CYCLES: Nat = 1_000_000_000_000; // 1e12 = 1 T Cycles
   stable let TOKEN_FEE: Nat = 10_000;
@@ -81,6 +82,10 @@ actor class bodhi(
     assetIdToToken_entries := [];
     userBuyedAssets_entries := [];
   };
+
+  public query func getCREATOR_PREMINT(): async Nat { CREATOR_PREMINT };
+
+  public query func getCREATOR_FEE_PERCENT(): async Nat { CREATOR_FEE_PERCENT };
 
   public query func getAssetsEntries(): async [(Nat, Asset)] {
     Iter.toArray(assets.entries())
@@ -259,7 +264,7 @@ actor class bodhi(
   };
 
   private func _getPrice(supply: Nat, amount: Nat): Nat {
-    (_curve(supply + amount) - _curve(supply)) / CREATOR_PREMINT / CREATOR_PREMINT / 50_000;
+    (_curve(supply + amount) - _curve(supply)) / CREATOR_PREMINT / CREATOR_PREMINT; // PM / k, k = 50_000
   };
 
   public query func getBuyPrice(assetId: Nat, amount: Nat): async Nat {
@@ -570,7 +575,7 @@ actor class bodhi(
     switch(assets.get(id)) {
       case(null) return "https://" # Principal.toText(bucketCanisterId) #".icp0.io";
       case(?_asset) {
-        "https://" # Principal.toText(bucketCanisterId) #".icp0.io/" # _asset.fileKey
+        "https://" # Principal.toText(bucketCanisterId) #".raw.icp0.io/" # _asset.fileKey
       }
     }
   }

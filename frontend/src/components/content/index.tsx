@@ -4,8 +4,8 @@ import {marked} from "marked";
 import {AssetPanel} from "../assetPanel";
 import {useNavigate, useParams} from "react-router-dom";
 import {Skeleton, Tooltip} from 'antd';
-import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
-import {bodhiApi} from "../../api/bodhi";
+import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
+import {bodhiApi} from "../../api/dawnlight";
 
 export const Home = React.memo(() => {
   const {id} = useParams()
@@ -95,7 +95,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
           &nbsp;
           <span style={{cursor: "pointer"}}
                 onClick={() => navigate(`/user/contents/${asset?.creator.toText()}`)}>{actor}</span>
-      </Tooltip>
+        </Tooltip>
       </span>
       <span style={{height: "24px", width: "24px"}}>
           <svg viewBox="0 0 24 24" focusable="false" className="chakra-icon css-onkibi" aria-hidden="true"><g

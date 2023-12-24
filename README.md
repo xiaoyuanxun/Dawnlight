@@ -27,18 +27,18 @@ dfx deploy icrc_token --argument '(record {
 ```
 
 ```shell
-dfx deploy bodhi_backend --argument '(principal "bkyz2-fmaaa-aaaaa-qaaaq-cai", principal "be2us-64aaa-aaaaa-qaabq-cai")'
+dfx deploy Dawnlight_backend --argument '(principal "bkyz2-fmaaa-aaaaa-qaaaq-cai", principal "be2us-64aaa-aaaaa-qaabq-cai")'
 
-dfx wallet send $(dfx canister id bodhi_backend) 10000000000000
+dfx wallet send $(dfx canister id Dawnlight_backend) 10000000000000
 ```
 
 ### 主网
-```json
+```
 bucket : r4yar-zqaaa-aaaan-qlfja-cai
 
-bodhi_backend : g5r75-yaaaa-aaaan-qlgua-cai
+Dawnlight_backend : g5r75-yaaaa-aaaan-qlgua-cai
 
-bodhi_frontend : g2qzj-vyaaa-aaaan-qlguq-cai
+Dawnlight_frontend : g2qzj-vyaaa-aaaan-qlguq-cai
 
 wicp : gttsv-dqaaa-aaaan-qlgva-cai
 ```
@@ -66,5 +66,5 @@ dfx deploy --ic icrc_token --argument '(record {
 ```
 
 ```shell
-dfx deploy --ic bodhi_backend --argument '(principal "r4yar-zqaaa-aaaan-qlfja-cai", principal "gttsv-dqaaa-aaaan-qlgva-cai")'
+dfx deploy --ic Dawnlight_backend --argument '(principal "r4yar-zqaaa-aaaan-qlfja-cai", principal "gttsv-dqaaa-aaaan-qlgva-cai")'
 ```

@@ -9,31 +9,7 @@ export interface Asset {
   'tokenCanister' : Principal,
   'fileKey' : string,
 }
-export type Error = { 'BurnError' : null } |
-  { 'InsufficientPayment' : null } |
-  { 'MintError' : null } |
-  { 'SupplyNotAllowedBelowPremintAmount' : null } |
-  { 'InsufficientBalance' : null } |
-  { 'AssetNotExist' : null } |
-  { 'TransferCreatorFeeError' : null } |
-  { 'Unauthorized' : null } |
-  { 'TransferToSellAccountError' : null } |
-  { 'AssetNotExistInBucket' : null } |
-  { 'AssetAlreadyCreated' : null } |
-  { 'TokenOfAssetNotExist' : null } |
-  { 'UnknowError' : null } |
-  { 'TransferToMainAccountError' : null };
-export type Result = { 'ok' : null } |
-  { 'err' : Error };
-export type Result_1 = { 'ok' : Principal } |
-  { 'err' : Error };
-export type Time = bigint;
-export interface TokenMetaData {
-  'creator' : Principal,
-  'assetId' : bigint,
-  'canisterId' : Principal,
-}
-export interface bodhi {
+export interface Dawnlight {
   'buy' : ActorMethod<[bigint, bigint], Result>,
   'create' : ActorMethod<[string], Result_1>,
   'getAsset' : ActorMethod<[bigint], [] | [Asset]>,
@@ -61,4 +37,28 @@ export interface bodhi {
   'sell' : ActorMethod<[bigint, bigint], Result>,
   'uri' : ActorMethod<[bigint], string>,
 }
-export interface _SERVICE extends bodhi {}
+export type Error = { 'BurnError' : null } |
+  { 'InsufficientPayment' : null } |
+  { 'MintError' : null } |
+  { 'SupplyNotAllowedBelowPremintAmount' : null } |
+  { 'InsufficientBalance' : null } |
+  { 'AssetNotExist' : null } |
+  { 'TransferCreatorFeeError' : null } |
+  { 'Unauthorized' : null } |
+  { 'TransferToSellAccountError' : null } |
+  { 'AssetNotExistInBucket' : null } |
+  { 'AssetAlreadyCreated' : null } |
+  { 'TokenOfAssetNotExist' : null } |
+  { 'UnknowError' : null } |
+  { 'TransferToMainAccountError' : null };
+export type Result = { 'ok' : null } |
+  { 'err' : Error };
+export type Result_1 = { 'ok' : Principal } |
+  { 'err' : Error };
+export type Time = bigint;
+export interface TokenMetaData {
+  'creator' : Principal,
+  'assetId' : bigint,
+  'canisterId' : Principal,
+}
+export interface _SERVICE extends Dawnlight {}

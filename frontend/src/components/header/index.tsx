@@ -4,7 +4,7 @@ import {NewModal} from "../modals/newModal";
 import {useAuth} from "../../utils/useAuth";
 import {useNavigate} from "react-router-dom";
 import {sliceString} from "../../utils/common";
-import {bodhiApi} from "../../api/bodhi";
+import {bodhiApi} from "../../api/dawnlight";
 import { icrcApi } from '../../api/icrc';
 import { Principal } from '@dfinity/candid/lib/cjs/idl';
 import { CopyToClipboard } from 'react-copy-to-clipboard';

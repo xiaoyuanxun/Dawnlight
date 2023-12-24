@@ -4,8 +4,8 @@ import {Content} from "../content";
 import {Outlet, Route, Routes, useLocation, useNavigate, useParams} from "react-router-dom";
 import {Explore} from "../explore";
 import {sliceString, stringToPrincipal} from "../../utils/common";
-import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
-import {bodhiApi, shareAsset} from "../../api/bodhi";
+import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
+import {bodhiApi, shareAsset} from "../../api/dawnlight";
 import {message} from "antd";
 
 export const UserPage = React.memo(() => {

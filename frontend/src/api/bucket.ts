@@ -3,7 +3,7 @@ import {getActor} from "../utils/Actor";
 import {idlFactory} from "../declarations/bucket/bucket.did.js"
 import {StoreArgs} from "../declarations/bucket/bucket";
 import {nanoid} from "nanoid"
-import {bodhiApi} from "./bodhi";
+import {bodhiApi} from "./dawnlight";
 
 const bucketId = "r4yar-zqaaa-aaaan-qlfja-cai"
 const chunkSize = 2031616

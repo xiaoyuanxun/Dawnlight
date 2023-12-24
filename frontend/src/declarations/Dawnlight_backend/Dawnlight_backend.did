@@ -1,4 +1,38 @@
-type bodhi = 
+type TokenMetaData = 
+ record {
+   assetId: nat;
+   canisterId: principal;
+   creator: principal;
+ };
+type Time = int;
+type Result_1 = 
+ variant {
+   err: Error;
+   ok: principal;
+ };
+type Result = 
+ variant {
+   err: Error;
+   ok;
+ };
+type Error = 
+ variant {
+   AssetAlreadyCreated;
+   AssetNotExist;
+   AssetNotExistInBucket;
+   BurnError;
+   InsufficientBalance;
+   InsufficientPayment;
+   MintError;
+   SupplyNotAllowedBelowPremintAmount;
+   TokenOfAssetNotExist;
+   TransferCreatorFeeError;
+   TransferToMainAccountError;
+   TransferToSellAccountError;
+   Unauthorized;
+   UnknowError;
+ };
+type Dawnlight = 
  service {
    buy: (nat, nat) -> (Result);
    create: (text) -> (Result_1);
@@ -52,40 +86,6 @@ type bodhi =
    sell: (nat, nat) -> (Result);
    uri: (nat) -> (text) query;
  };
-type TokenMetaData = 
- record {
-   assetId: nat;
-   canisterId: principal;
-   creator: principal;
- };
-type Time = int;
-type Result_1 = 
- variant {
-   err: Error;
-   ok: principal;
- };
-type Result = 
- variant {
-   err: Error;
-   ok;
- };
-type Error = 
- variant {
-   AssetAlreadyCreated;
-   AssetNotExist;
-   AssetNotExistInBucket;
-   BurnError;
-   InsufficientBalance;
-   InsufficientPayment;
-   MintError;
-   SupplyNotAllowedBelowPremintAmount;
-   TokenOfAssetNotExist;
-   TransferCreatorFeeError;
-   TransferToMainAccountError;
-   TransferToSellAccountError;
-   Unauthorized;
-   UnknowError;
- };
 type Asset = 
  record {
    creator: principal;
@@ -95,4 +95,4 @@ type Asset =
    time: Time;
    tokenCanister: principal;
  };
-service : (principal, principal) -> bodhi
+service : (principal, principal) -> Dawnlight
