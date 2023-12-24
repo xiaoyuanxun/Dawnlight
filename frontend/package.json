@@ -17,6 +17,7 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.68",
     "@types/react": "^18.2.45",
+    "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "^18.2.18",
     "@uiw/react-md-editor": "^4.0.1",
     "antd": "^5.12.4",

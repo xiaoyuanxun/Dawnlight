@@ -19,7 +19,7 @@ export const Header = React.memo(() => {
     <NewModal setOpen={setOpen} open={open}/>
     <div className={styles.header_left} onClick={() => navigate("explore")}>
       <img height={30} width={30} src="https://bodhi.wtf/assets/bodhi-f8f8fb-180-faebd556.png" alt=""/>
-      BodHi - IC
+      Dawnlight
     </div>
     <div style={{height: "100%", display: "flex", alignItems: "center", gap: "10px"}}>
       {isAuth && <div onClick={() => setOpen(true)} className={styles.header_button}

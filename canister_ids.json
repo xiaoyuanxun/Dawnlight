@@ -2,10 +2,10 @@
     "bucket": {
         "ic" : "r4yar-zqaaa-aaaan-qlfja-cai"
     },
-    "bodhi_backend": {
+    "Dawnlight_backend": {
         "ic" : "g5r75-yaaaa-aaaan-qlgua-cai"
     },
-    "bodhi_frontend": {
+    "Dawnlight_frontend": {
         "ic" : "g2qzj-vyaaa-aaaan-qlguq-cai"
     },
     "icrc_token": {

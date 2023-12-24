@@ -118,7 +118,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
     <div className={styles.content_footer}>
       <div className={styles.content_footer_left}>
         <span>$392.75</span>
-        <span style={{fontSize: "14px", fontWeight: "300"}}> 0.17779 ETH / Share</span>
+        <span style={{fontSize: "14px", fontWeight: "300"}}> 39.8 ICP / Share</span>
       </div>
       <div className={styles.content_footer_right}>
         <div className={styles.content_footer_right_button_1} onClick={handleBuy}>
