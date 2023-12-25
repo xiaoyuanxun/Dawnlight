@@ -5,7 +5,7 @@ import {Outlet, Route, Routes, useLocation, useNavigate, useParams} from "react-
 import {Explore} from "../explore";
 import {sliceString, stringToPrincipal} from "../../utils/common";
 import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
-import {bodhiApi, shareAsset} from "../../api/dawnlight";
+import {drawnlightApi, shareAsset} from "../../api/dawnlight";
 import {message} from "antd";
 
 export const UserPage = React.memo(() => {
@@ -47,7 +47,7 @@ export const MyContents = React.memo(() => {
   const fetch = async () => {
     try {
       const principal = stringToPrincipal(address)
-      const res = await bodhiApi.getUserCreated(principal)
+      const res = await drawnlightApi.getUserCreated(principal)
       setData(res)
     } catch (e) {
       message.error("address error")
@@ -72,7 +72,7 @@ export const Holding = React.memo(() => {
   const fetch = async () => {
     try {
       const principal = stringToPrincipal(address)
-      const res = await bodhiApi.getUserBuyed(principal)
+      const res = await drawnlightApi.getUserBuyed(principal)
       setData(res)
     } catch (e) {
       message.error("address error")

@@ -3,7 +3,7 @@ import {getActor} from "../utils/Actor";
 import {idlFactory} from "../declarations/bucket/bucket.did.js"
 import {StoreArgs} from "../declarations/bucket/bucket";
 import {nanoid} from "nanoid"
-import {bodhiApi} from "./dawnlight";
+import {drawnlightApi} from "./dawnlight";
 
 const bucketId = "r4yar-zqaaa-aaaan-qlfja-cai"
 const chunkSize = 2031616
@@ -28,7 +28,7 @@ export default class Bucket {
         index: BigInt(0)
       }
       await actor.store(arg)
-      await bodhiApi.create(fileKey)
+      await drawnlightApi.create(fileKey)
     } catch (e) {
       console.log("store", e)
       throw e
@@ -86,7 +86,7 @@ export default class Bucket {
         allPromise.push(Actor.store(arg))
       }
       await Promise.all(allPromise)
-      await bodhiApi.create(key)
+      await drawnlightApi.create(key)
     } catch (e) {
       throw e
     }

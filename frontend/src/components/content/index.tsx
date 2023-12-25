@@ -5,7 +5,8 @@ import {AssetPanel} from "../assetPanel";
 import {useNavigate, useParams} from "react-router-dom";
 import {Skeleton, Tooltip} from 'antd';
 import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
-import {bodhiApi} from "../../api/dawnlight";
+import {drawnlightApi} from "../../api/dawnlight";
+import { BuyModal } from '../modals/newModal';
 
 export const Home = React.memo(() => {
   const {id} = useParams()
@@ -19,7 +20,7 @@ export const Home = React.memo(() => {
     const b = Number(ID)
     if (isNaN(b)) return
     try {
-      const res = await bodhiApi.getAsset(b)
+      const res = await drawnlightApi.getAsset(b)
       setData(res)
     } catch (e) {
       setData(undefined)
@@ -43,6 +44,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   const {isHidden, asset, isSimple} = props
   const ref = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
+  const [buyModalOpen, setBuyModalOpen] = useState(false)
 
   const actor = React.useMemo(() => {
     if (!asset) return ''
@@ -51,7 +53,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   }, [asset])
 
   const handleBuy = async () => {
-
+    setBuyModalOpen(true)
   };
 
   const handleSell = async () => {
@@ -124,6 +126,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
         <div className={styles.content_footer_right_button_1} onClick={handleBuy}>
           Buy
         </div>
+        <BuyModal open={buyModalOpen} setOpen={setBuyModalOpen} assetId={Number(asset?.id)}/>
         <div className={styles.content_footer_right_button_2} onClick={handleSell}>
           Sell
         </div>

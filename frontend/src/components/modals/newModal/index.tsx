@@ -1,13 +1,25 @@
-import React, {useState} from 'react';
-import {Modal} from 'antd';
+import React, {useEffect, useState} from 'react';
+import {
+  Modal, Typography, Radio, Input, Space, notification
+} from 'antd';
 import styles from "./index.less"
 import {bucketApi} from "../../../api/bucket";
 import {useDropzone} from "react-dropzone";
+import {useAuth} from "../../../utils/useAuth";
+import { drawnlightApi } from '../../../api/dawnlight';
+import type { RadioChangeEvent } from 'antd';
+import {LoadingOutlined, CheckOutlined, CloseOutlined} from '@ant-design/icons';
+import { icrcApi } from '../../../api/icrc';
+import { Principal } from '@dfinity/principal';
+import { getSubAccount } from '../../../utils/common';
+
+const DECIMALS: number = 100_000_000;
+const TEST_ICP_CANISTER = 'gttsv-dqaaa-aaaan-qlgva-cai';
+const DAWNLIGHT_CANISTER = 'g5r75-yaaaa-aaaan-qlgua-cai';
 
 export const NewModal = React.memo((props: { open: boolean, setOpen: Function }) => {
   const {open, setOpen} = props
   const [step, setStep] = useState(0)
-
 
   return (
     <Modal
@@ -91,3 +103,132 @@ const Step2 = React.memo(() => {
   </div>
 })
 
+export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, assetId: number}) => {
+  const {open, setOpen, assetId} = props
+  const [step, setStep] = useState(0)
+  const {identity,isAuth} = useAuth()
+  const [value, setValue] = useState(1);
+  const [amount, setAmount] = useState(1);
+  const [price, setPrice] = useState(1);
+  const [api, contextHolder] = notification.useNotification();
+
+  const onChange = (e: RadioChangeEvent) => {
+    // console.log('radio checked', e.target.value);
+    setValue(e.target.value);
+  };
+
+  const initBuyPrice = async () => {
+    if(assetId != undefined && !Number.isNaN(assetId)) {
+      if(value === 1) {
+        const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(DECIMALS))
+        setPrice(Number(price))
+        setAmount(DECIMALS)
+      } else if(value === 2) {
+        const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(10 * DECIMALS))
+        setPrice(Number(price))
+        setAmount(10 * DECIMALS)
+      } else if(value === 3) {
+        const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(100 * DECIMALS))
+        setPrice(Number(price))
+        setAmount(100 * DECIMALS)
+      } 
+      // else if(value == 4) {
+      //   const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(amount * DECIMALS))
+      //   setPrice(Number(price))
+      // }
+    }
+  };
+
+  const buy = async() => {
+    const _asset = assetId;
+    const _amount = amount;
+    api.info({
+      message: 'Buy Asset',
+      key: 'buy',
+      duration: null,
+      description: '',
+      icon: <LoadingOutlined/>
+    })
+    api.info({
+      message: 'Transfer TEST ICP',
+      key: 'transfer',
+      duration: null,
+      description: '',
+      icon: <LoadingOutlined/>
+    })
+    const _icrcApi = icrcApi(TEST_ICP_CANISTER);
+    const transferResult = await _icrcApi.icrc1_transfer({
+      to: {
+        owner: Principal.fromText(DAWNLIGHT_CANISTER),
+        subaccount: [getSubAccount(identity?.getPrincipal() as Principal)]
+      },
+      fee: [],
+      memo: [],
+      from_subaccount: [],
+      created_at_time: [],
+      amount: BigInt(price)
+    });
+    console.log(transferResult)
+    if('Ok' in transferResult) {
+      api.success({
+        message: 'Transfer TEST ICP Successful !',
+        key: 'transfer',
+        description: '',
+        icon: <CheckOutlined/>
+      });
+      const buyResult = await drawnlightApi.buy(BigInt(_asset), BigInt(_amount))
+      if(buyResult == null) {
+        api.success({
+          message: 'Buy Asset Successful !',
+          key: 'buy',
+          description: '',
+          icon: <CheckOutlined/>
+        });
+      }
+    } else {
+      api.error({
+        message: 'Transfer TEST ICP Error !',
+        key: 'transfer',
+        description: '',
+        icon: <CloseOutlined />
+      });
+      api.error({
+        message: 'Buy Asset Error !',
+        key: 'buy',
+        description: '',
+        icon: <CloseOutlined />
+      });
+    }
+  }
+
+  useEffect(() => {
+    initBuyPrice()
+  }, [assetId, value]);
+
+  return (
+    <Modal 
+      title={`Asset#${assetId}`}
+      open={open} 
+      // onOk={handleOk} 
+      onCancel={() => setOpen(false)}
+      okText='BUY'
+      onOk={buy}
+    >
+      <Typography.Paragraph>
+        Price : {Number(price / DECIMALS)} ICP
+      </Typography.Paragraph>
+      <Radio.Group onChange={onChange} value={value}>
+        <Space direction="vertical">
+          <Radio.Button value={1}>1 Share</Radio.Button>
+          <Radio.Button value={2}>10 Share</Radio.Button>
+          <Radio.Button value={3}>100 Share</Radio.Button>
+          {/* <Radio.Button value={4}>
+            Other
+            {value === 4 ? <Input style={{ width: 100, marginLeft: 20}} /> : null}
+          </Radio.Button> */}
+        </Space>
+      </Radio.Group>
+      {contextHolder}
+    </Modal>
+  );
+})

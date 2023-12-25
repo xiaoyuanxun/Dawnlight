@@ -38,7 +38,7 @@ class ICRC {
             const res = await actor.icrc1_transfer(args) as TransferResult
             return res
         } catch(e) {
-            console.log("icrc1_transfer : ", e)
+            console.error("icrc1_transfer : ", e)
             throw e
         }
     }

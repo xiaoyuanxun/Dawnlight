@@ -46,5 +46,6 @@ module {
     public type BucketActor = BucketTypes.BucketActor;
 
     public type ICRCActor = ICRCTypes.TokenInterface;
-
+    public type TransferResult = ICRCTypes.TransferResult;
+    
 }
