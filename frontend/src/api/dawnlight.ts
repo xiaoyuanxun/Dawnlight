@@ -1,6 +1,6 @@
 import {idlFactory} from "../declarations/Dawnlight_backend/Dawnlight_backend.did.js";
 import {getActor} from "../utils/Actor";
-import {Asset, Result_1, Result} from "../declarations/Dawnlight_backend/Dawnlight_backend";
+import {Asset, Result, Result_1, TradeMetaData} from "../declarations/Dawnlight_backend/Dawnlight_backend";
 import {Principal} from "@dfinity/principal";
 
 const bodhi_cai = "g5r75-yaaaa-aaaan-qlgua-cai"
@@ -103,13 +103,47 @@ class Drawnlight {
     }
   }
 
-  async getWicp(to:Principal){
+  async getWicp(to: Principal) {
     const actor = await Drawnlight.getNoIdentityActor()
     try {
       const res = await actor.getWicp(to) as Result
       console.log(res)
-    }catch (e) {
-      console.log("getWicp",e)
+    } catch (e) {
+      console.log("getWicp", e)
+      throw e
+    }
+  }
+
+  async getRecentTrade(assetId: bigint) {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      return await actor.getRecentTrade(assetId) as TradeMetaData[]
+    } catch (e) {
+      console.log("getRecentTrade", e)
+      throw e
+    }
+  }
+
+  async getHolders(assetId: bigint) {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getHolders(assetId) as Principal[]
+      console.log(res)
+      return res
+    } catch (e) {
+      console.log("getHolders", e)
+      throw e
+    }
+  }
+
+  async getShareSupply(assetId: bigint) {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getShareSupply(assetId) as bigint
+      console.log(res)
+      return res
+    } catch (e) {
+      console.log("getShareSupply", e)
       throw e
     }
   }

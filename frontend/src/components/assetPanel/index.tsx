@@ -1,20 +1,36 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import styles from "./index.less"
+import {Asset, TradeMetaData} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
+import {drawnlightApi} from "../../api/dawnlight";
+import {DECIMALS} from "../modals/newModal";
+import {sliceString} from "../../utils/common";
 
-const Trades = React.memo(() => {
+const Trades = React.memo((props: { asset?: Asset }) => {
+  const [recent, setRecent] = useState<TradeMetaData[]>()
+
+  const init = async () => {
+    if (!props.asset) return
+    const res = await drawnlightApi.getRecentTrade(props.asset.id)
+    setRecent(res)
+  }
+
+  useEffect(() => {
+    init()
+  }, [props.asset])
   return <>
-    {new Array(100).fill(0).map((v, k) => {
+    {recent?.map((v, k) => {
       return <div className={styles.panel_item} key={k}>
         <span>🛁</span>
-        <span>35cik-...-pae</span>
-        <span className={styles.panel_item_tag}>SOLD</span>
-        <span> 0.03 share for 3.60 ICP</span>
+        <span>{sliceString(v.user.toText())}</span>
+        <span className={styles.panel_item_tag}>{Object.keys(v.tradeType)[0].toUpperCase()}</span>
+        <span> {Number(v.tokenAmount) / DECIMALS} share for {Number(v.icpAmount) / DECIMALS} ICP</span>
       </div>
     })}
   </>
 })
 
-const Holders = React.memo(() => {
+const Holders = React.memo((props: { asset?: Asset }) => {
+  // const [holders]
   return <>
     <div className={styles.holder_header}>
       <span>HOLDER</span>
@@ -29,21 +45,31 @@ const Holders = React.memo(() => {
   </>
 })
 
-const Overview = React.memo(() => {
+const Overview = React.memo((props: { asset?: Asset }) => {
+  const [supply, setSupply] = useState<bigint>()
+
+  const init = async () => {
+    if (!props.asset) return
+    const res = await drawnlightApi.getShareSupply(props.asset.id)
+    setSupply(res)
+  }
+
+  useEffect(() => {
+    init()
+  }, [props.asset])
   return <>
-    <div style={{marginBottom:"24px"}}>
+    <div style={{marginBottom: "24px"}}>
       <div className={styles.overview_title}>Total Value in the Pool</div>
       <div className={styles.overview_content}>$124093.33</div>
-      <div className={styles.overview_des}>11532.33 ICP</div>
     </div>
     <div>
       <div className={styles.overview_title}>Share Supply</div>
-      <div className={styles.overview_content}>142.400844000000000001 Shares</div>
+      <div className={styles.overview_content}>{Number(supply) / DECIMALS} Shares</div>
     </div>
   </>
 })
 
-export const AssetPanel = React.memo(() => {
+export const AssetPanel = React.memo((props: { asset?: Asset }) => {
   const [tag, setTag] = useState(0)
   const arr = ["Recent Trades", "Holders", "Overview"]
 
@@ -54,7 +80,7 @@ export const AssetPanel = React.memo(() => {
       })}
     </div>
     <div className={styles.panel_main}>
-      {tag === 0 ? <Trades/> : tag === 1 ? <Holders/> : <Overview/>}
+      {tag === 0 ? <Trades {...props}/> : tag === 1 ? <Holders {...props}/> : <Overview {...props}/>}
     </div>
   </div>
 })

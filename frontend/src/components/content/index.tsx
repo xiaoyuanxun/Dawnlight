@@ -34,7 +34,7 @@ export const Home = React.memo(() => {
   return <div style={{width: "100%"}}>
     <Content isHidden={false} asset={data} isSimple={false}/>
     <div style={{height: "20px"}}/>
-    <AssetPanel/>
+    <AssetPanel asset={data}/>
     <div style={{height: "90px"}}/>
     <FixedDiv/>
   </div>
