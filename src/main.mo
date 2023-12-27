@@ -88,6 +88,19 @@ actor class Dawnlight(
     userBuyedAssets_entries := [];
   };
 
+  public query func getTradeEventEntries(): async [(
+    TradeType, Nat, Principal, Nat, Nat, Nat
+  )] {
+    TradeEvent
+  };
+
+  public query func getPoolValue(assetId: Nat): async Nat {
+    switch(pool.get(assetId)) {
+      case(null) 0;
+      case(?_poolValue) _poolValue;
+    }
+  };
+
   public query func getRecentTrade(assetId: Nat): async [TradeMetaData] {
     let tradeBuffer = Buffer.Buffer<TradeMetaData>(TradeEvent.size());
     for(_trade in Array.reverse(TradeEvent).vals()) {
@@ -104,16 +117,16 @@ actor class Dawnlight(
     Buffer.toArray<TradeMetaData>(tradeBuffer)
   };
 
-  public query func getHolders(assetId: Nat): async [Principal] {
-    let holdersBuffer = Buffer.Buffer<Principal>(userBuyedAssets.size());
+  public query func getHolders(assetId: Nat): async [(Principal, Nat)] {
+    let holdersBuffer = Buffer.Buffer<(Principal, Nat)>(userBuyedAssets.size());
     for((_k, _v) in userBuyedAssets.entries()) {
       for((_asset, _amount) in _v.vals()) {
         if(_asset.id == assetId) {
-          holdersBuffer.add(_k)
+          holdersBuffer.add(_k, _amount)
         };
       }
     };
-    Buffer.toArray<Principal>(holdersBuffer)
+    Buffer.toArray<(Principal, Nat)>(holdersBuffer)
   };
 
   public query func getShareSupply(assetId: Nat): async Nat {

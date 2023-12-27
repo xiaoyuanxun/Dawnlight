@@ -114,6 +114,17 @@ class Drawnlight {
     }
   }
 
+  async getPoolValue(assetId: bigint): Promise<bigint> {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getPoolValue(assetId) as bigint
+      return res
+    } catch (e) {
+      console.log("getPoolValue", e)
+      throw e
+    }
+  }
+
   async getRecentTrade(assetId: bigint) {
     const actor = await Drawnlight.getNoIdentityActor()
     try {
@@ -124,10 +135,10 @@ class Drawnlight {
     }
   }
 
-  async getHolders(assetId: bigint) {
+  async getHolders(assetId: bigint): Promise<Array<[Principal, bigint]>>{
     const actor = await Drawnlight.getNoIdentityActor()
     try {
-      const res = await actor.getHolders(assetId) as Principal[]
+      const res = await actor.getHolders(assetId) as Array<[Principal, bigint]>
       return res
     } catch (e) {
       console.log("getHolders", e)

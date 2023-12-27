@@ -1,3 +1,9 @@
+type TradeType__1 = 
+ variant {
+   Buy;
+   Mint;
+   Sell;
+ };
 type TradeType = 
  variant {
    Buy;
@@ -9,7 +15,7 @@ type TradeMetaData =
    assetId: nat;
    icpAmount: nat;
    tokenAmount: nat;
-   tradeType: TradeType;
+   tradeType: TradeType__1;
    user: principal;
  };
 type TokenMetaData = 
@@ -68,11 +74,15 @@ type Dawnlight =
                                             text;
                                             nat;
                                           }) query;
-   getHolders: (nat) -> (vec principal) query;
+   getHolders: (nat) -> (vec record {
+                               principal;
+                               nat;
+                             }) query;
    getPoolEntries: () -> (vec record {
                                 nat;
                                 nat;
                               }) query;
+   getPoolValue: (nat) -> (nat) query;
    getPrice: (nat, nat) -> (nat) query;
    getRecentTrade: (nat) -> (vec TradeMetaData) query;
    getSellPrice: (nat, nat) -> (nat) query;
@@ -83,6 +93,15 @@ type Dawnlight =
                                        nat;
                                        nat;
                                      }) query;
+   getTradeEventEntries: () ->
+    (vec record {
+           TradeType;
+           nat;
+           principal;
+           nat;
+           nat;
+           nat;
+         }) query;
    getUserAssetsEntries: () -> (vec record {
                                       principal;
                                       vec nat;

@@ -5,6 +5,7 @@ import {drawnlightApi} from "../../api/dawnlight";
 import {DECIMALS} from "../modals/newModal";
 import {sliceString} from "../../utils/common";
 import {Skeleton} from 'antd';
+import { Principal } from '@dfinity/principal'
 
 const Trades = React.memo((props: { asset?: Asset }) => {
   const [recent, setRecent] = useState<TradeMetaData[]>()
@@ -18,6 +19,7 @@ const Trades = React.memo((props: { asset?: Asset }) => {
   useEffect(() => {
     init()
   }, [props.asset])
+
   return <>
     {recent ? recent.map((v, k) => {
       return <div className={styles.panel_item} key={k}>
@@ -33,23 +35,45 @@ const Trades = React.memo((props: { asset?: Asset }) => {
 })
 
 const Holders = React.memo((props: { asset?: Asset }) => {
-  // const [holders]
+  const [holders, setHodlers] = useState<Array<[Principal, bigint]>>()
+
+  const init = async() => {
+    if(!props.asset) return
+    const res = await drawnlightApi.getHolders(props.asset.id)
+    setHodlers(res)
+  }
+
+  useEffect(() => {
+    init()
+  }, [props.asset])
+
   return <>
     <div className={styles.holder_header}>
       <span>HOLDER</span>
       <span>SHARE</span>
     </div>
     <div className={styles.holder_item}>
-      <span>
-        🌱 35cik-...-pae
-      </span>
-      <span>6</span>
+      {
+        holders?.map((v, k) => {
+          return (
+            <>
+              <span>
+                🌱 {sliceString(v[0].toText())}
+              </span>
+              <span>
+                {Number(v[1]) / DECIMALS}
+              </span>
+            </>
+          )
+        })
+      }
     </div>
   </>
 })
 
 const Overview = React.memo((props: { asset?: Asset }) => {
   const [supply, setSupply] = useState<bigint>()
+  const [poolValue, setPoolValue] = useState<number>(0)
 
   const init = async () => {
     if (!props.asset) return
@@ -57,14 +81,21 @@ const Overview = React.memo((props: { asset?: Asset }) => {
     setSupply(res)
   }
 
+  const getPoolValue = async () => {
+    if (!props.asset) return
+    const res = await drawnlightApi.getPoolValue(props.asset.id);
+    setPoolValue(Number(res) / DECIMALS)
+  }
+
   useEffect(() => {
     init()
+    getPoolValue()
   }, [props.asset])
   return <>
     {supply ? <>
       <div style={{marginBottom: "24px"}}>
         <div className={styles.overview_title}>Total Value in the Pool</div>
-        <div className={styles.overview_content}>$124093.33</div>
+        <div className={styles.overview_content}>{poolValue} ICP</div>
       </div>
       <div>
         <div className={styles.overview_title}>Share Supply</div>

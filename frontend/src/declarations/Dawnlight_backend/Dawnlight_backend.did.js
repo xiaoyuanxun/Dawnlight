@@ -31,17 +31,22 @@ export const idlFactory = ({ IDL }) => {
     'assetId' : IDL.Nat,
     'canisterId' : IDL.Principal,
   });
-  const TradeType = IDL.Variant({
+  const TradeType__1 = IDL.Variant({
     'Buy' : IDL.Null,
     'Mint' : IDL.Null,
     'Sell' : IDL.Null,
   });
   const TradeMetaData = IDL.Record({
-    'tradeType' : TradeType,
+    'tradeType' : TradeType__1,
     'assetId' : IDL.Nat,
     'user' : IDL.Principal,
     'tokenAmount' : IDL.Nat,
     'icpAmount' : IDL.Nat,
+  });
+  const TradeType = IDL.Variant({
+    'Buy' : IDL.Null,
+    'Mint' : IDL.Null,
+    'Sell' : IDL.Null,
   });
   const Dawnlight = IDL.Service({
     'buy' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
@@ -71,12 +76,17 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))],
         ['query'],
       ),
-    'getHolders' : IDL.Func([IDL.Nat], [IDL.Vec(IDL.Principal)], ['query']),
+    'getHolders' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat))],
+        ['query'],
+      ),
     'getPoolEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))],
         ['query'],
       ),
+    'getPoolValue' : IDL.Func([IDL.Nat], [IDL.Nat], ['query']),
     'getPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
     'getRecentTrade' : IDL.Func([IDL.Nat], [IDL.Vec(TradeMetaData)], ['query']),
     'getSellPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
@@ -90,6 +100,22 @@ export const idlFactory = ({ IDL }) => {
     'getTotalSupplyEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))],
+        ['query'],
+      ),
+    'getTradeEventEntries' : IDL.Func(
+        [],
+        [
+          IDL.Vec(
+            IDL.Tuple(
+              TradeType,
+              IDL.Nat,
+              IDL.Principal,
+              IDL.Nat,
+              IDL.Nat,
+              IDL.Nat,
+            )
+          ),
+        ],
         ['query'],
       ),
     'getUserAssetsEntries' : IDL.Func(
