@@ -31,6 +31,18 @@ export const idlFactory = ({ IDL }) => {
     'assetId' : IDL.Nat,
     'canisterId' : IDL.Principal,
   });
+  const TradeType = IDL.Variant({
+    'Buy' : IDL.Null,
+    'Mint' : IDL.Null,
+    'Sell' : IDL.Null,
+  });
+  const TradeMetaData = IDL.Record({
+    'tradeType' : TradeType,
+    'assetId' : IDL.Nat,
+    'user' : IDL.Principal,
+    'tokenAmount' : IDL.Nat,
+    'icpAmount' : IDL.Nat,
+  });
   const Dawnlight = IDL.Service({
     'buy' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'create' : IDL.Func([IDL.Text], [Result_1], []),
@@ -52,19 +64,24 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getBuyPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
     'getBuyPriceAfterFee' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
+    'getCREATOR_FEE_PERCENT' : IDL.Func([], [IDL.Nat], ['query']),
+    'getCREATOR_PREMINT' : IDL.Func([], [IDL.Nat], ['query']),
     'getFileKeyToAssetIdEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))],
         ['query'],
       ),
+    'getHolders' : IDL.Func([IDL.Nat], [IDL.Vec(IDL.Principal)], ['query']),
     'getPoolEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Nat))],
         ['query'],
       ),
     'getPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
+    'getRecentTrade' : IDL.Func([IDL.Nat], [IDL.Vec(TradeMetaData)], ['query']),
     'getSellPrice' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
     'getSellPriceAfterFee' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Nat], ['query']),
+    'getShareSupply' : IDL.Func([IDL.Nat], [IDL.Nat], ['query']),
     'getTokenCanisterByAssetId' : IDL.Func(
         [IDL.Nat],
         [IDL.Opt(IDL.Principal)],

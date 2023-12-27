@@ -28,6 +28,7 @@ actor class Dawnlight(
   type Error = Types.Error;
   type TokenMetaData = Types.TokenMetaData;
   type ICRCActor = Types.ICRCActor;
+  type TradeMetaData = Types.TradeMetaData;
 
   stable var bucketCanisterId = _bucketCanisterId;
   stable var wicpCanisterId = _wicpCanisterId;
@@ -85,6 +86,41 @@ actor class Dawnlight(
     pool_entries := [];
     assetIdToToken_entries := [];
     userBuyedAssets_entries := [];
+  };
+
+  public query func getRecentTrade(assetId: Nat): async [TradeMetaData] {
+    let tradeBuffer = Buffer.Buffer<TradeMetaData>(TradeEvent.size());
+    for(_trade in Array.reverse(TradeEvent).vals()) {
+      if(_trade.1 == assetId) {
+        tradeBuffer.add({
+          tradeType = _trade.0;
+          assetId = _trade.1;
+          user = _trade.2;
+          tokenAmount = _trade.3;
+          icpAmount = _trade.4;
+        })
+      }
+    };
+    Buffer.toArray<TradeMetaData>(tradeBuffer)
+  };
+
+  public query func getHolders(assetId: Nat): async [Principal] {
+    let holdersBuffer = Buffer.Buffer<Principal>(userBuyedAssets.size());
+    for((_k, _v) in userBuyedAssets.entries()) {
+      for((_asset, _amount) in _v.vals()) {
+        if(_asset.id == assetId) {
+          holdersBuffer.add(_k)
+        };
+      }
+    };
+    Buffer.toArray<Principal>(holdersBuffer)
+  };
+
+  public query func getShareSupply(assetId: Nat): async Nat {
+    switch(totalSupply.get(assetId)) {
+      case(null) 0;
+      case(?_supply) _supply;
+    }
   };
 
   public query func getCREATOR_PREMINT(): async Nat { CREATOR_PREMINT };

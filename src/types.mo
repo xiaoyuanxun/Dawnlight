@@ -43,9 +43,17 @@ module {
         creator: Principal;
     };
 
+    public type TradeMetaData = {
+        tradeType: TradeType;
+        assetId: Nat;
+        user: Principal;
+        tokenAmount: Nat;
+        icpAmount: Nat;
+    };
+
     public type BucketActor = BucketTypes.BucketActor;
 
     public type ICRCActor = ICRCTypes.TokenInterface;
     public type TransferResult = ICRCTypes.TransferResult;
-    
+
 }
