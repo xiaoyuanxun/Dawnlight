@@ -4,6 +4,7 @@ import {Asset, TradeMetaData} from "../../declarations/Dawnlight_backend/Dawnlig
 import {drawnlightApi} from "../../api/dawnlight";
 import {DECIMALS} from "../modals/newModal";
 import {sliceString} from "../../utils/common";
+import {Skeleton} from 'antd';
 
 const Trades = React.memo((props: { asset?: Asset }) => {
   const [recent, setRecent] = useState<TradeMetaData[]>()
@@ -18,14 +19,16 @@ const Trades = React.memo((props: { asset?: Asset }) => {
     init()
   }, [props.asset])
   return <>
-    {recent?.map((v, k) => {
+    {recent ? recent.map((v, k) => {
       return <div className={styles.panel_item} key={k}>
         <span>🛁</span>
         <span>{sliceString(v.user.toText())}</span>
         <span className={styles.panel_item_tag}>{Object.keys(v.tradeType)[0].toUpperCase()}</span>
         <span> {Number(v.tokenAmount) / DECIMALS} share for {Number(v.icpAmount) / DECIMALS} ICP</span>
       </div>
-    })}
+    }) : <div style={{height: "200px"}}>
+      <Skeleton/>
+    </div>}
   </>
 })
 
@@ -58,14 +61,18 @@ const Overview = React.memo((props: { asset?: Asset }) => {
     init()
   }, [props.asset])
   return <>
-    <div style={{marginBottom: "24px"}}>
-      <div className={styles.overview_title}>Total Value in the Pool</div>
-      <div className={styles.overview_content}>$124093.33</div>
-    </div>
-    <div>
-      <div className={styles.overview_title}>Share Supply</div>
-      <div className={styles.overview_content}>{Number(supply) / DECIMALS} Shares</div>
-    </div>
+    {supply ? <>
+      <div style={{marginBottom: "24px"}}>
+        <div className={styles.overview_title}>Total Value in the Pool</div>
+        <div className={styles.overview_content}>$124093.33</div>
+      </div>
+      <div>
+        <div className={styles.overview_title}>Share Supply</div>
+        <div className={styles.overview_content}>{Number(supply) / DECIMALS} Shares</div>
+      </div>
+    </> : <div>
+      <Skeleton.Input/>
+    </div>}
   </>
 })
 

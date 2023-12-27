@@ -118,14 +118,15 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
                                                                                stroke="none"></circle></g></svg>
         </span>
     </div>
-    {/*<div style={{width:'520px'}}>*/}
-    {/*  <Skeleton/>*/}
-    {/*</div>*/}
-    <div ref={ref} className={isHidden ? styles.content_main : styles.content_main_2}/>
-    {isSimple && <div className={styles.read_full_asset}
-                      onClick={() => navigate(`/${Number(asset?.id)}`)}>
-      Read Full Asset
-    </div>}
+    {!asset ? <div style={{width: '520px'}}>
+      <Skeleton/>
+    </div> : <>
+      <div ref={ref} className={isHidden ? styles.content_main : styles.content_main_2}/>
+      {isSimple && <div className={styles.read_full_asset}
+                        onClick={() => navigate(`/${Number(asset?.id)}`)}>
+        Read Full Asset
+      </div>}
+    </>}
     <div className={styles.content_footer}>
       <div className={styles.content_footer_left}>
         <span>{Number(price / DECIMALS)} ICP / Share</span>

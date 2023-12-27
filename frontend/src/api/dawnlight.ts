@@ -128,7 +128,6 @@ class Drawnlight {
     const actor = await Drawnlight.getNoIdentityActor()
     try {
       const res = await actor.getHolders(assetId) as Principal[]
-      console.log(res)
       return res
     } catch (e) {
       console.log("getHolders", e)
@@ -140,7 +139,6 @@ class Drawnlight {
     const actor = await Drawnlight.getNoIdentityActor()
     try {
       const res = await actor.getShareSupply(assetId) as bigint
-      console.log(res)
       return res
     } catch (e) {
       console.log("getShareSupply", e)

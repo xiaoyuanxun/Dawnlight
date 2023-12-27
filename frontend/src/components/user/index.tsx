@@ -6,7 +6,7 @@ import {Explore} from "../explore";
 import {sliceString, stringToPrincipal} from "../../utils/common";
 import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
 import {drawnlightApi, shareAsset} from "../../api/dawnlight";
-import {message} from "antd";
+import {message, Spin} from "antd";
 
 export const UserPage = React.memo(() => {
   const navigate = useNavigate()
@@ -59,9 +59,11 @@ export const MyContents = React.memo(() => {
   }, [])
 
   return <div style={{margin: "20px 0", display: "flex", flexDirection: 'column', gap: "20px"}}>
-    {data?.map((v, k) => {
-      return <Content isSimple={true} key={k} asset={v} isHidden={true}/>
-    })}
+    <Spin spinning={!data}>
+      {data?.map((v, k) => {
+        return <Content isSimple={true} key={k} asset={v} isHidden={true}/>
+      })}
+    </Spin>
   </div>
 })
 
@@ -83,15 +85,17 @@ export const Holding = React.memo(() => {
     fetch()
   }, [])
   return <div style={{marginTop: "28px"}}>
-    <div className={styles.table_head}>
-      <span>ASSET</span>
-      <span></span>
-      <span>SHARES</span>
-      <span>SHARE VALUE</span>
-    </div>
-    {data?.map((v, k) => {
-      return <Card asset={v} key={k}/>
-    })}
+    <Spin spinning={!data}>
+      <div className={styles.table_head}>
+        <span>ASSET</span>
+        <span></span>
+        <span>SHARES</span>
+        <span>SHARE VALUE</span>
+      </div>
+      {data?.map((v, k) => {
+        return <Card asset={v} key={k}/>
+      })}
+    </Spin>
   </div>
 })
 
