@@ -128,7 +128,14 @@ actor class Dawnlight(
   public query func getCREATOR_FEE_PERCENT(): async Nat { CREATOR_FEE_PERCENT };
 
   public query func getAssetsEntries(): async [(Nat, Asset)] {
-    Iter.toArray(assets.entries())
+    Iter.toArray(
+      Iter.sort<(Nat, Asset)>(
+        assets.entries(),
+        func (x: (Nat, Asset), y: (Nat, Asset)): Order.Order {
+          Nat.compare(x.0, y.0)
+        }
+      )
+    )
   };
 
   public query func getUserAssetsEntries(): async [(Principal, [Nat])] {
