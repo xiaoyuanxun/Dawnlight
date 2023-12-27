@@ -6,7 +6,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {Skeleton, Tooltip} from 'antd';
 import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
 import {drawnlightApi} from "../../api/dawnlight";
-import { BuyModal } from '../modals/newModal';
+import {BuyModal, DECIMALS} from '../modals/newModal';
 
 export const Home = React.memo(() => {
   const {id} = useParams()
@@ -45,6 +45,13 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   const ref = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
   const [buyModalOpen, setBuyModalOpen] = useState(false)
+  const [price, setPrice] = useState(0)
+
+  const intPrice = async () => {
+    if (!asset) return
+    const price = await drawnlightApi.getBuyPriceAfterFee(asset.id, BigInt(DECIMALS))
+    setPrice(Number(price))
+  }
 
   const actor = React.useMemo(() => {
     if (!asset) return ''
@@ -59,7 +66,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   const handleSell = async () => {
 
   };
-  
+
   const fetchData = async () => {
     if (!asset) return
     try {
@@ -68,14 +75,15 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
         if (ref.current) {
           let content: string = ""
           const fileType = asset.fileType
+          const url = `https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`
           if (fileType.includes("text")) {
-            const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
+            const res = await fetch(url)
             const arraybuffer = await res.arrayBuffer()
             content = await marked.parse(new TextDecoder().decode(arraybuffer))
           } else if (fileType.includes("image")) {
-            content = `<img  src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}"/>`
+            content = `<img  src="${url}"/>`
           } else if (fileType.includes("video")) {
-            content = `<div style="display: flex;justify-content: center"> <video controls src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}" type="${asset.fileType}"/> <div/>`
+            content = `<div style="display: flex;justify-content: center"> <video controls src="${url}" type="${asset.fileType}"/> <div/>`
           }
           ref.current.innerHTML = content
         }
@@ -87,6 +95,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
 
   useEffect(() => {
     fetchData()
+    intPrice()
   }, [asset])
 
   return <div className={styles.content_wrap}>
@@ -119,8 +128,8 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
     </div>}
     <div className={styles.content_footer}>
       <div className={styles.content_footer_left}>
-        <span>$392.75</span>
-        <span style={{fontSize: "14px", fontWeight: "300"}}> 39.8 ICP / Share</span>
+        <span>{Number(price / DECIMALS)} ICP / Share</span>
+        {/*<span style={{fontSize: "14px", fontWeight: "300"}}> 39.8 ICP / Share</span>*/}
       </div>
       <div className={styles.content_footer_right}>
         <div className={styles.content_footer_right_button_1} onClick={handleBuy}>

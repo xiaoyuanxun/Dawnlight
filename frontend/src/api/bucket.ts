@@ -1,9 +1,8 @@
-import {Principal} from "@dfinity/principal";
 import {getActor} from "../utils/Actor";
 import {idlFactory} from "../declarations/bucket/bucket.did.js"
 import {StoreArgs} from "../declarations/bucket/bucket";
-import {nanoid} from "nanoid"
 import {drawnlightApi} from "./dawnlight";
+import {sha256} from "js-sha256";
 
 const bucketId = "r4yar-zqaaa-aaaan-qlfja-cai"
 const chunkSize = 2031616
@@ -18,7 +17,7 @@ export default class Bucket {
     const Data = new TextEncoder().encode(data)
     const actor = await Bucket.getActor()
     try {
-      const fileKey = nanoid()
+      const fileKey = sha256(Data)
       const arg: StoreArgs = {
         key: fileKey,
         value: Data,
@@ -68,12 +67,17 @@ export default class Bucket {
     try {
       const Actor = await Bucket.getActor()
       const allPromise: Array<Promise<any>> = []
-      const key = nanoid()
       const file_extension = file.type
       const total_size = file.size
       const total_index = Math.ceil(total_size / chunkSize)
-      console.log("total_index", total_index)
       const allData = await Bucket.FileRead(file)
+      for (let i = 0; i < allData.length; i++) {
+      }
+      const b = allData.reduce((a, b) => {
+        // @ts-ignore
+        return new Uint8Array([...a, ...b])
+      }, new Uint8Array([]))
+      const key = sha256(b)
       for (let i = 0; i < allData.length; i++) {
         const arg: StoreArgs = {
           file_type: file_extension,

@@ -13,7 +13,7 @@ import { icrcApi } from '../../../api/icrc';
 import { Principal } from '@dfinity/principal';
 import { getSubAccount } from '../../../utils/common';
 
-const DECIMALS: number = 100_000_000;
+export const DECIMALS: number = 100_000_000;
 const TEST_ICP_CANISTER = 'gttsv-dqaaa-aaaan-qlgva-cai';
 const DAWNLIGHT_CANISTER = 'g5r75-yaaaa-aaaan-qlgua-cai';
 
@@ -131,7 +131,7 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
         const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(100 * DECIMALS))
         setPrice(Number(price))
         setAmount(100 * DECIMALS)
-      } 
+      }
       // else if(value == 4) {
       //   const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(amount * DECIMALS))
       //   setPrice(Number(price))
@@ -206,10 +206,10 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
   }, [assetId, value]);
 
   return (
-    <Modal 
+    <Modal
       title={`Asset#${assetId}`}
-      open={open} 
-      // onOk={handleOk} 
+      open={open}
+      // onOk={handleOk}
       onCancel={() => setOpen(false)}
       okText='BUY'
       onOk={buy}

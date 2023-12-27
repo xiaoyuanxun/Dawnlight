@@ -5,9 +5,9 @@ import {useAuth} from "../../utils/useAuth";
 import {useNavigate} from "react-router-dom";
 import {sliceString} from "../../utils/common";
 import {drawnlightApi} from "../../api/dawnlight";
-import { icrcApi } from '../../api/icrc';
-import { Principal } from '@dfinity/candid/lib/cjs/idl';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import {icrcApi} from '../../api/icrc';
+import {Principal} from '@dfinity/candid/lib/cjs/idl';
+import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 const wicp_canister_id = "gttsv-dqaaa-aaaan-qlgva-cai";
 
@@ -54,7 +54,7 @@ const Account = React.memo(() => {
   const [icpBalance, setICPBalance] = useState(0)
 
   const initUserICPBalance = async () => {
-    if(principal != undefined) {
+    if (principal != undefined) {
       const userICPBalance = await icrcApi(wicp_canister_id).icrc1_balance_of({
         owner: principal,
         subaccount: []
@@ -64,7 +64,9 @@ const Account = React.memo(() => {
   };
 
   const handleClaimICP = async () => {
-    
+    if (!principal) return
+    await drawnlightApi.getWicp(principal)
+    initUserICPBalance()
   }
 
   useEffect(() => {
