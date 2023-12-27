@@ -58,14 +58,15 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
         if (ref.current) {
           let content: string = ""
           const fileType = asset.fileType
+          const url = `https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`
           if (fileType.includes("text")) {
-            const res = await fetch(`https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`)
+            const res = await fetch(url)
             const arraybuffer = await res.arrayBuffer()
             content = await marked.parse(new TextDecoder().decode(arraybuffer))
           } else if (fileType.includes("image")) {
-            content = `<img  src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}"/>`
+            content = `<img  src="${url}"/>`
           } else if (fileType.includes("video")) {
-            content = `<div style="display: flex;justify-content: center"> <video controls src="https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}" type="${asset.fileType}"/> <div/>`
+            content = `<div style="display: flex;justify-content: center"> <video controls src="${url}" type="${asset.fileType}"/> <div/>`
           }
           ref.current.innerHTML = content
         }
