@@ -6,7 +6,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {Skeleton, Tooltip} from 'antd';
 import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
 import {drawnlightApi} from "../../api/dawnlight";
-import {BuyModal, DECIMALS} from '../modals/newModal';
+import {BuyModal, DECIMALS, SellModal} from '../modals/newModal';
 
 export const Home = React.memo(() => {
   const {id} = useParams()
@@ -45,6 +45,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   const ref = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
   const [buyModalOpen, setBuyModalOpen] = useState(false)
+  const [sellModalOpen, setSellModalOpen] = useState(false)
   const [price, setPrice] = useState(0)
 
   const intPrice = async () => {
@@ -64,7 +65,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   };
 
   const handleSell = async () => {
-
+    setSellModalOpen(true)
   };
 
   const fetchData = async () => {
@@ -140,6 +141,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
         <div className={styles.content_footer_right_button_2} onClick={handleSell}>
           Sell
         </div>
+        <SellModal open={sellModalOpen} setOpen={setSellModalOpen} assetId={Number(asset?.id)}/>
       </div>
     </div>
   </div>

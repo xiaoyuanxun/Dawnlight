@@ -52,6 +52,11 @@ export const idlFactory = ({ IDL }) => {
     'buy' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'create' : IDL.Func([IDL.Text], [Result_1], []),
     'getAsset' : IDL.Func([IDL.Nat], [IDL.Opt(Asset)], ['query']),
+    'getAssetIdToToken' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(IDL.Principal)],
+        ['query'],
+      ),
     'getAssetIdToTokenEntries' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, TokenMetaData))],

@@ -232,3 +232,154 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
     </Modal>
   );
 })
+
+export const SellModal = React.memo((props: { open: boolean, setOpen: Function, assetId: number}) => {
+  const {open, setOpen, assetId} = props
+  const [step, setStep] = useState(0)
+  const {identity,isAuth} = useAuth()
+  const [value, setValue] = useState(1);
+  const [amount, setAmount] = useState(1); 
+  const [price, setPrice] = useState(1);
+  const [api, contextHolder] = notification.useNotification();
+  const [assetToken, setAssetToken] = useState<Principal>()
+
+  const onChange = (e: RadioChangeEvent) => {
+    // console.log('radio checked', e.target.value);
+    setValue(e.target.value);
+  };
+
+  const initSellPrice = async () => {
+    if(assetId != undefined && !Number.isNaN(assetId)) {
+      if(value === 1) {
+        const price = await drawnlightApi.getSellPriceAfterFee(BigInt(assetId), BigInt(DECIMALS))
+        setPrice(Number(price))
+        setAmount(DECIMALS)
+      } else if(value === 2) {
+        const price = await drawnlightApi.getSellPriceAfterFee(BigInt(assetId), BigInt(10 * DECIMALS))
+        setPrice(Number(price))
+        setAmount(10 * DECIMALS)
+      } else if(value === 3) {
+        const price = await drawnlightApi.getSellPriceAfterFee(BigInt(assetId), BigInt(100 * DECIMALS))
+        setPrice(Number(price))
+        setAmount(100 * DECIMALS)
+      }
+      // else if(value == 4) {
+      //   const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(amount * DECIMALS))
+      //   setPrice(Number(price))
+      // }
+    }
+  };
+
+  const initAssetToken = async() => {
+    if(assetId != undefined && !Number.isNaN(assetId)) {
+      const res = await drawnlightApi.getAssetIdToToken(BigInt(assetId))
+      if(res.length > 0) {
+        setAssetToken(res[0])
+      } 
+    }
+  }
+
+  const sell = async() => {
+    const _asset = assetId;
+    const _amount = amount;
+    api.info({
+      message: 'Sell Asset',
+      key: 'sell',
+      duration: null,
+      description: '',
+      icon: <LoadingOutlined/>
+    })
+    api.info({
+      message: 'Transfer Asset Token',
+      key: 'transfer',
+      duration: null,
+      description: '',
+      icon: <LoadingOutlined/>
+    })
+    const _icrcApi = icrcApi(assetToken!.toString());
+    const transferResult = await _icrcApi.icrc1_transfer({
+      to: {
+        owner: Principal.fromText(DAWNLIGHT_CANISTER),
+        subaccount: [getSubAccount(identity?.getPrincipal() as Principal)]
+      },
+      fee: [],
+      memo: [],
+      from_subaccount: [],
+      created_at_time: [],
+      amount: BigInt(amount)
+    });
+    // console.log(transferResult)
+    if('Ok' in transferResult) {
+      api.success({
+        message: 'Transfer Asset Token Successful !',
+        key: 'transfer',
+        description: '',
+        icon: <CheckOutlined/>
+      });
+      const sellResult = await drawnlightApi.sell(BigInt(_asset), BigInt(_amount))
+      if(sellResult == null) {
+        api.success({
+          message: 'Sell Asset Successful !',
+          key: 'sell',
+          description: '',
+          icon: <CheckOutlined/>
+        });
+      }
+    } else {
+      api.error({
+        message: 'Transfer Asset Token Error !',
+        key: 'transfer',
+        description: '',
+        icon: <CloseOutlined />
+      });
+      api.error({
+        message: 'Sell Asset Error !',
+        key: 'sell',
+        description: '',
+        icon: <CloseOutlined />
+      });
+    }
+  }
+
+  const test = async () => {
+    if(assetToken) {
+      const res = await icrcApi(assetToken.toString()).icrc1_balance_of({
+        owner: Principal.fromText(DAWNLIGHT_CANISTER),
+        subaccount: [getSubAccount(identity?.getPrincipal() as Principal)]
+      });
+      console.log('sell test : ', res);
+    }
+  }
+
+  useEffect(() => {
+    initAssetToken()
+    initSellPrice()
+    test()
+  }, [assetId, value]);
+
+  return (
+    <Modal
+      title={`Asset#${assetId}`}
+      open={open}
+      onCancel={() => setOpen(false)}
+      okText='Sell'
+      onOk={sell}
+    >
+      <Typography.Paragraph>
+        Price : {Number(price / DECIMALS)} ICP
+      </Typography.Paragraph>
+      <Radio.Group onChange={onChange} value={value}>
+        <Space direction="vertical">
+          <Radio.Button value={1}>1 Share</Radio.Button>
+          <Radio.Button value={2}>10 Share</Radio.Button>
+          <Radio.Button value={3}>100 Share</Radio.Button>
+          {/* <Radio.Button value={4}>
+            Other
+            {value === 4 ? <Input style={{ width: 100, marginLeft: 20}} /> : null}
+          </Radio.Button> */}
+        </Space>
+      </Radio.Group>
+      {contextHolder}
+    </Modal>
+  );
+})

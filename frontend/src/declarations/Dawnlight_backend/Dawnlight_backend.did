@@ -57,6 +57,7 @@ type Dawnlight =
    buy: (nat, nat) -> (Result);
    create: (text) -> (Result_1);
    getAsset: (nat) -> (opt Asset) query;
+   getAssetIdToToken: (nat) -> (opt principal) query;
    getAssetIdToTokenEntries: () -> (vec record {
                                           nat;
                                           TokenMetaData;

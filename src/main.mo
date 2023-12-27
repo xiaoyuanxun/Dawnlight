@@ -88,6 +88,13 @@ actor class Dawnlight(
     userBuyedAssets_entries := [];
   };
 
+  public query func getAssetIdToToken(assetId: Nat): async ?Principal {
+    switch(assetIdToToken.get(assetId)) {
+      case(null) null;
+      case(?_tokenMetaData) ?_tokenMetaData.canisterId;
+    }
+  };
+
   public query func getTradeEventEntries(): async [(
     TradeType, Nat, Principal, Nat, Nat, Nat
   )] {
@@ -126,6 +133,8 @@ actor class Dawnlight(
         };
       }
     };
+    // 添加作者本人
+
     Buffer.toArray<(Principal, Nat)>(holdersBuffer)
   };
 
@@ -166,7 +175,7 @@ actor class Dawnlight(
   public query func getPoolEntries(): async [(Nat, Nat)] {
     Iter.toArray(pool.entries())
   };
-
+  
   public query func getAssetIdToTokenEntries(): async [(Nat, TokenMetaData)] {
     Iter.toArray(assetIdToToken.entries())
   };
@@ -349,6 +358,7 @@ actor class Dawnlight(
         _getPrice(0 - amount, amount)
       };
       case(?_supply) {
+        if((_supply + DECIMALS)<= amount) return _getPrice(DECIMALS, _supply);
         _getPrice(_supply - amount, amount)
       };
     }
@@ -404,7 +414,7 @@ actor class Dawnlight(
         owner = Principal.fromActor(this);
         subaccount = null;
       };
-      amount = price + creatorFee;
+      amount = price + creatorFee - TOKEN_FEE;
       fee = null;
       memo = null;
       created_at_time = null;
@@ -462,7 +472,7 @@ actor class Dawnlight(
             owner = _asset.creator;
             subaccount = null;
           };
-          amount = creatorFee;
+          amount = creatorFee - TOKEN_FEE;
           fee = null;
           memo = null;
           created_at_time = null;
@@ -546,12 +556,14 @@ actor class Dawnlight(
   // 得先获取 token 的 canister_id getTokenCanisterByAssetId
   // getSellPriceAfterFee 获取 token 要转的amount
   // 调token canister 转给 bodhi_caniser, sub(Principal.toBlob(caller))
-  // amount * 1e18
+  // amount * 1e8
   public shared({caller}) func sell(
     assetId: Nat,
     amount: Nat
   ): async Result.Result<(), Error> {
     if(assetId >= ASSET_INDEX) return #err(#AssetNotExist);
+    let price = _getSellPrice(assetId, amount);
+    let creatorFee = (price * CREATOR_FEE_PERCENT) / CREATOR_PREMINT;
     switch(assetIdToToken.get(assetId)) {
       case(null) return #err(#TokenOfAssetNotExist);
       case(?_tokenMetaData) {
@@ -567,11 +579,10 @@ actor class Dawnlight(
           case(?_supply) {
             if(_supply - amount < CREATOR_PREMINT) return #err(#SupplyNotAllowedBelowPremintAmount);
 
-
             // burn
             switch((await token.burn({
               from_subaccount = ?_principalToSubAccount(caller);
-              amount = amount;
+              amount = amount - TOKEN_FEE;
               memo = null;
               created_at_time = null;
             }))) {
@@ -587,9 +598,6 @@ actor class Dawnlight(
       };
     };
 
-    let price = _getSellPrice(assetId, amount);
-    let creatorFee = (price * CREATOR_FEE_PERCENT) / CREATOR_PREMINT;
-
     switch(pool.get(assetId)) {
       case(null) return #err(#UnknowError);
       case(?_poolPrice) {
@@ -597,7 +605,7 @@ actor class Dawnlight(
       };
     };
 
-    TradeEvent := Array.append(TradeEvent, [(#Buy, assetId, caller, amount, price, creatorFee)]);
+    TradeEvent := Array.append(TradeEvent, [(#Sell, assetId, caller, amount, price, creatorFee)]);
 
     let wicp: ICRCActor = actor(Principal.toText(wicpCanisterId));
 
@@ -608,7 +616,7 @@ actor class Dawnlight(
         owner = caller;
         subaccount = null;
       };
-      amount = price - creatorFee;
+      amount = price - creatorFee - TOKEN_FEE;
       fee = null;
       memo = null;
       created_at_time = null;
@@ -628,7 +636,7 @@ actor class Dawnlight(
             owner = _asset.creator;
             subaccount = null;
           };
-          amount = creatorFee;
+          amount = creatorFee - TOKEN_FEE;
           fee = null;
           memo = null;
           created_at_time = null;

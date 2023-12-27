@@ -44,6 +44,19 @@ class Drawnlight {
     }
   }
 
+  async sell(assetId: bigint, amout: bigint): Promise<null> {
+    const actor = await Drawnlight.getActor()
+    try {
+      const res = await actor.sell(assetId, amout) as Result
+      if ("ok" in res) {
+        return res.ok
+      } else throw new Error(Object.keys(res.err)[0])
+    } catch (e) {
+      console.log("sell", e)
+      throw e
+    }
+  }
+
   async getAssetsEntries(): Promise<Asset[]> {
     const actor = await Drawnlight.getActor()
     try {
@@ -92,13 +105,46 @@ class Drawnlight {
     }
   }
 
-  async getBuyPriceAfterFee(asstId: bigint, amount: bigint): Promise<bigint> {
+  async getSellPriceAfterFee(assetId: bigint, amount: bigint): Promise<bigint> {
     const actor = await Drawnlight.getNoIdentityActor()
     try {
-      const res = await actor.getBuyPriceAfterFee(asstId, amount) as bigint;
+      const res = await actor.getSellPriceAfterFee(assetId, amount) as bigint;
+      return res
+    } catch (e) {
+      console.log("getSellPriceAfterFee", e)
+      throw e
+    }
+  }
+
+  async getSellPrice(assetId: bigint, amount: bigint): Promise<bigint> {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getSellPrice(assetId, amount) as bigint;
+      return res
+    } catch (e) {
+      console.log("getSellPrice", e)
+      throw e
+    }
+  }
+
+  async getBuyPriceAfterFee(assetId: bigint, amount: bigint): Promise<bigint> {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getBuyPriceAfterFee(assetId, amount) as bigint;
       return res
     } catch (e) {
       console.log("getBuyPriceAfterFee", e)
+      throw e
+    }
+  }
+  
+  async getAssetIdToToken(assetId: bigint): Promise<[] | [Principal]> {
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getAssetIdToToken(assetId) as [] | [Principal];
+      return res
+    } catch (e) {
+      console.log("getAssetIdToToken", e)
       throw e
     }
   }

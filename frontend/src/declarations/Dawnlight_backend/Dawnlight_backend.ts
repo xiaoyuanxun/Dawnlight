@@ -13,6 +13,7 @@ export interface Dawnlight {
   'buy' : ActorMethod<[bigint, bigint], Result>,
   'create' : ActorMethod<[string], Result_1>,
   'getAsset' : ActorMethod<[bigint], [] | [Asset]>,
+  'getAssetIdToToken' : ActorMethod<[bigint], [] | [Principal]>,
   'getAssetIdToTokenEntries' : ActorMethod<[], Array<[bigint, TokenMetaData]>>,
   'getAssetIdsByPrincipal' : ActorMethod<[Principal], [] | [Array<bigint>]>,
   'getAssetsEntries' : ActorMethod<[], Array<[bigint, Asset]>>,
