@@ -4,8 +4,9 @@ import {marked} from "marked";
 import {AssetPanel} from "../assetPanel";
 import {useNavigate, useParams} from "react-router-dom";
 import {Skeleton, Tooltip} from 'antd';
-import {Asset} from "../../declarations/bodhi_backend/bodhi_backend";
-import {bodhiApi} from "../../api/bodhi";
+import {Asset} from "../../declarations/Dawnlight_backend/Dawnlight_backend";
+import {drawnlightApi} from "../../api/dawnlight";
+import { BuyModal } from '../modals/newModal';
 
 export const Home = React.memo(() => {
   const {id} = useParams()
@@ -19,7 +20,7 @@ export const Home = React.memo(() => {
     const b = Number(ID)
     if (isNaN(b)) return
     try {
-      const res = await bodhiApi.getAsset(b)
+      const res = await drawnlightApi.getAsset(b)
       setData(res)
     } catch (e) {
       setData(undefined)
@@ -43,6 +44,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
   const {isHidden, asset, isSimple} = props
   const ref = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
+  const [buyModalOpen, setBuyModalOpen] = useState(false)
 
   const actor = React.useMemo(() => {
     if (!asset) return ''
@@ -50,6 +52,14 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
     return principal.substring(0, 3) + "..." + principal.substring(principal.length - 3, principal.length)
   }, [asset])
 
+  const handleBuy = async () => {
+    setBuyModalOpen(true)
+  };
+
+  const handleSell = async () => {
+
+  };
+  
   const fetchData = async () => {
     if (!asset) return
     try {
@@ -88,7 +98,7 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
           &nbsp;
           <span style={{cursor: "pointer"}}
                 onClick={() => navigate(`/user/contents/${asset?.creator.toText()}`)}>{actor}</span>
-      </Tooltip>
+        </Tooltip>
       </span>
       <span style={{height: "24px", width: "24px"}}>
           <svg viewBox="0 0 24 24" focusable="false" className="chakra-icon css-onkibi" aria-hidden="true"><g
@@ -111,11 +121,16 @@ export const Content = React.memo((props: { isHidden: boolean, asset?: Asset, is
     <div className={styles.content_footer}>
       <div className={styles.content_footer_left}>
         <span>$392.75</span>
-        <span style={{fontSize: "14px", fontWeight: "300"}}> 0.17779 ETH / Share</span>
+        <span style={{fontSize: "14px", fontWeight: "300"}}> 39.8 ICP / Share</span>
       </div>
       <div className={styles.content_footer_right}>
-        <div className={styles.content_footer_right_button_1}>Buy</div>
-        <div className={styles.content_footer_right_button_2}>Sell</div>
+        <div className={styles.content_footer_right_button_1} onClick={handleBuy}>
+          Buy
+        </div>
+        <BuyModal open={buyModalOpen} setOpen={setBuyModalOpen} assetId={Number(asset?.id)}/>
+        <div className={styles.content_footer_right_button_2} onClick={handleSell}>
+          Sell
+        </div>
       </div>
     </div>
   </div>

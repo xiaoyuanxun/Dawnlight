@@ -31,7 +31,7 @@ export const idlFactory = ({ IDL }) => {
     'assetId' : IDL.Nat,
     'canisterId' : IDL.Principal,
   });
-  const bodhi = IDL.Service({
+  const Dawnlight = IDL.Service({
     'buy' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'create' : IDL.Func([IDL.Text], [Result_1], []),
     'getAsset' : IDL.Func([IDL.Nat], [IDL.Opt(Asset)], ['query']),
@@ -96,6 +96,6 @@ export const idlFactory = ({ IDL }) => {
     'sell' : IDL.Func([IDL.Nat, IDL.Nat], [Result], []),
     'uri' : IDL.Func([IDL.Nat], [IDL.Text], ['query']),
   });
-  return bodhi;
+  return Dawnlight;
 };
 export const init = ({ IDL }) => { return [IDL.Principal, IDL.Principal]; };

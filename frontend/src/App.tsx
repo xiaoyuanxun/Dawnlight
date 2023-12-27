@@ -6,7 +6,7 @@ import {Explore} from "./components/explore";
 import {Routes, Route} from "react-router-dom";
 import {Assets} from "./components/assets";
 import {Editor} from "./components/editor";
-import {bodhiApi} from "./api/bodhi";
+import {drawnlightApi} from "./api/dawnlight";
 
 function App() {
   //

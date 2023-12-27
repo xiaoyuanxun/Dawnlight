@@ -1,6 +1,6 @@
 {
   "canisters": {
-    "bodhi_backend": {
+    "Dawnlight_backend": {
       "main": "src/main.mo",
       "type": "motoko"
     },
@@ -12,13 +12,10 @@
       "main": "src/icrc/token.mo",
       "type": "motoko"
     },
-    "bodhi_frontend": {
+    "Dawnlight_frontend": {
       "frontend": {
         "entrypoint": "frontend/build/index.html"
       },
-      "dependencies": [
-        "bodhi_backend"
-      ],
       "source": [
         "frontend/build"
       ],

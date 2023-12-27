@@ -6,9 +6,9 @@ const Trades = React.memo(() => {
     {new Array(100).fill(0).map((v, k) => {
       return <div className={styles.panel_item} key={k}>
         <span>🛁</span>
-        <span>0x8d</span>
+        <span>35cik-...-pae</span>
         <span className={styles.panel_item_tag}>SOLD</span>
-        <span> 0.03 share for 0.03600 ETH</span>
+        <span> 0.03 share for 3.60 ICP</span>
       </div>
     })}
   </>
@@ -22,7 +22,7 @@ const Holders = React.memo(() => {
     </div>
     <div className={styles.holder_item}>
       <span>
-        🌱 0xD10b...068D
+        🌱 35cik-...-pae
       </span>
       <span>6</span>
     </div>
@@ -34,7 +34,7 @@ const Overview = React.memo(() => {
     <div style={{marginBottom:"24px"}}>
       <div className={styles.overview_title}>Total Value in the Pool</div>
       <div className={styles.overview_content}>$124093.33</div>
-      <div className={styles.overview_des}>56.54393 ETH</div>
+      <div className={styles.overview_des}>11532.33 ICP</div>
     </div>
     <div>
       <div className={styles.overview_title}>Share Supply</div>

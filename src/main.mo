@@ -12,8 +12,12 @@ import Token "icrc/token";
 import Buffer "mo:base/Buffer";
 import Time "mo:base/Time";
 import Order "mo:base/Order";
+import {ic} "mo:ic";
+import Blob "mo:base/Blob";
+import Nat8 "mo:base/Nat8";
+import Debug "mo:base/Debug";
 
-actor class bodhi(
+actor class Dawnlight(
   _bucketCanisterId: Principal,
   _wicpCanisterId: Principal
 ) = this {
@@ -56,8 +60,9 @@ actor class bodhi(
   stable var assetIdToToken_entries: [(Nat, TokenMetaData)] = [];
   let assetIdToToken = TrieMap.fromEntries<Nat, TokenMetaData>(assetIdToToken_entries.vals(), Nat.equal, Hash.hash);
 
-  stable let CREATOR_PREMINT: Nat = 1_000_000_000_000_000_000; // 1e18
-  stable let CREATOR_FEE_PERCENT: Nat = 50_000_000_000_000_000; // 5%
+  stable var CREATOR_PREMINT: Nat = 100_000_000; // 1e8
+  stable let MAX_SUPPLY: Nat = 100_000_000_000 * CREATOR_PREMINT; // 1k 亿 
+  stable var CREATOR_FEE_PERCENT: Nat = 5_000_000; // 5%
   stable let DECIMALS: Nat = 100_000_000; // 1e8
   stable let T_CYCLES: Nat = 1_000_000_000_000; // 1e12 = 1 T Cycles
   stable let TOKEN_FEE: Nat = 10_000;
@@ -81,6 +86,10 @@ actor class bodhi(
     assetIdToToken_entries := [];
     userBuyedAssets_entries := [];
   };
+
+  public query func getCREATOR_PREMINT(): async Nat { CREATOR_PREMINT };
+
+  public query func getCREATOR_FEE_PERCENT(): async Nat { CREATOR_FEE_PERCENT };
 
   public query func getAssetsEntries(): async [(Nat, Asset)] {
     Iter.toArray(assets.entries())
@@ -187,7 +196,7 @@ actor class bodhi(
               symbol = "bodhi_ic_" # Nat.toText(newAssetId);
               decimals = 8;
               fee = TOKEN_FEE;
-              max_supply = CREATOR_PREMINT;
+              max_supply = MAX_SUPPLY;
               initial_balances = [({
                 owner = caller;
                 subaccount = null;
@@ -259,7 +268,7 @@ actor class bodhi(
   };
 
   private func _getPrice(supply: Nat, amount: Nat): Nat {
-    (_curve(supply + amount) - _curve(supply)) / CREATOR_PREMINT / CREATOR_PREMINT / 50_000;
+    (_curve(supply + amount) - _curve(supply)) / CREATOR_PREMINT / CREATOR_PREMINT / 50; // PM / k, k = 50_000
   };
 
   public query func getBuyPrice(assetId: Nat, amount: Nat): async Nat {
@@ -301,6 +310,18 @@ actor class bodhi(
     price - creatorFee
   };
 
+  // Convert principal id to subaccount id.
+  // sub account = [sun_account_id_size, principal_blob, 0,0,···]
+  private func _principalToSubAccount(id: Principal) : Blob {
+      let p = Blob.toArray(Principal.toBlob(id));
+      let subAccount = Array.tabulate(32, func(i : Nat) : Nat8 {
+          if (i >= p.size() + 1) 0 
+          else if (i == 0) (Nat8.fromNat(p.size()))
+          else (p[i - 1])
+      });
+      Blob.fromArray(subAccount)
+  };
+
   // getBuyPriceAfterFee 查询付的钱
   // 调wicp 转 bodhi_caniser, subAccount(Principal.toBlob(caller))
   // amount 0.01 share = 0.01 * 1e18
@@ -316,13 +337,13 @@ actor class bodhi(
     // 检查用户给子账户付款是否充足
     let transferedAmount = await wicp.icrc1_balance_of({
       owner = Principal.fromActor(this);
-      subaccount = ?Principal.toBlob(caller);
+      subaccount = ?_principalToSubAccount(caller)
     });    
     if(transferedAmount < price + creatorFee) return #err(#InsufficientPayment);
     
     // 转走给主账号
     switch((await wicp.icrc1_transfer({
-      from_subaccount = ?Principal.toBlob(caller);
+      from_subaccount = ?_principalToSubAccount(caller);
       to = {
         owner = Principal.fromActor(this);
         subaccount = null;
@@ -334,22 +355,6 @@ actor class bodhi(
     }))) {
       case(#Err(_)) return #err(#TransferToMainAccountError);
       case(#Ok(_)) {
-      };
-    };
-
-    switch(totalSupply.get(assetId)) {
-      case(null) return #err(#UnknowError);
-      case(?_supply) {
-        totalSupply.put(assetId, _supply + amount);
-      };
-    };
-
-    switch(pool.get(assetId)) {
-      case(null) {
-        pool.put(assetId, price);
-      };
-      case(?_poolPrice) {
-        pool.put(assetId, _poolPrice + price);
       };
     };
 
@@ -370,6 +375,22 @@ actor class bodhi(
           case(#Err(_)) return #err(#MintError);
           case(#Ok(_)) { }
         };
+      };
+    };
+
+    switch(totalSupply.get(assetId)) {
+      case(null) return #err(#UnknowError);
+      case(?_supply) {
+        totalSupply.put(assetId, _supply + amount);
+      };
+    };
+
+    switch(pool.get(assetId)) {
+      case(null) {
+        pool.put(assetId, price);
+      };
+      case(?_poolPrice) {
+        pool.put(assetId, _poolPrice + price);
       };
     };
 
@@ -481,7 +502,7 @@ actor class bodhi(
         let token: ICRCActor = actor(Principal.toText(_tokenMetaData.canisterId));
         let burnTokenBalance = await token.icrc1_balance_of({
           owner = Principal.fromActor(this);
-          subaccount = ?Principal.toBlob(caller);
+          subaccount = ?_principalToSubAccount(caller);
         });
         if(burnTokenBalance < amount) return #err(#InsufficientBalance);
 
@@ -493,7 +514,7 @@ actor class bodhi(
 
             // burn
             switch((await token.burn({
-              from_subaccount = ?Principal.toBlob(caller);
+              from_subaccount = ?_principalToSubAccount(caller);
               amount = amount;
               memo = null;
               created_at_time = null;
@@ -570,7 +591,7 @@ actor class bodhi(
     switch(assets.get(id)) {
       case(null) return "https://" # Principal.toText(bucketCanisterId) #".icp0.io";
       case(?_asset) {
-        "https://" # Principal.toText(bucketCanisterId) #".icp0.io/" # _asset.fileKey
+        "https://" # Principal.toText(bucketCanisterId) #".raw.icp0.io/" # _asset.fileKey
       }
     }
   }
