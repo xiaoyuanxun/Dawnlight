@@ -18,11 +18,16 @@ export interface Dawnlight {
   'getAssetsEntries' : ActorMethod<[], Array<[bigint, Asset]>>,
   'getBuyPrice' : ActorMethod<[bigint, bigint], bigint>,
   'getBuyPriceAfterFee' : ActorMethod<[bigint, bigint], bigint>,
+  'getCREATOR_FEE_PERCENT' : ActorMethod<[], bigint>,
+  'getCREATOR_PREMINT' : ActorMethod<[], bigint>,
   'getFileKeyToAssetIdEntries' : ActorMethod<[], Array<[string, bigint]>>,
+  'getHolders' : ActorMethod<[bigint], Array<Principal>>,
   'getPoolEntries' : ActorMethod<[], Array<[bigint, bigint]>>,
   'getPrice' : ActorMethod<[bigint, bigint], bigint>,
+  'getRecentTrade' : ActorMethod<[bigint], Array<TradeMetaData>>,
   'getSellPrice' : ActorMethod<[bigint, bigint], bigint>,
   'getSellPriceAfterFee' : ActorMethod<[bigint, bigint], bigint>,
+  'getShareSupply' : ActorMethod<[bigint], bigint>,
   'getTokenCanisterByAssetId' : ActorMethod<[bigint], [] | [Principal]>,
   'getTotalSupplyEntries' : ActorMethod<[], Array<[bigint, bigint]>>,
   'getUserAssetsEntries' : ActorMethod<[], Array<[Principal, Array<bigint>]>>,
@@ -61,4 +66,14 @@ export interface TokenMetaData {
   'assetId' : bigint,
   'canisterId' : Principal,
 }
+export interface TradeMetaData {
+  'tradeType' : TradeType,
+  'assetId' : bigint,
+  'user' : Principal,
+  'tokenAmount' : bigint,
+  'icpAmount' : bigint,
+}
+export type TradeType = { 'Buy' : null } |
+  { 'Mint' : null } |
+  { 'Sell' : null };
 export interface _SERVICE extends Dawnlight {}

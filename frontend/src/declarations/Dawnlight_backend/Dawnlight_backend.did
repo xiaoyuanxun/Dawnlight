@@ -1,3 +1,17 @@
+type TradeType = 
+ variant {
+   Buy;
+   Mint;
+   Sell;
+ };
+type TradeMetaData = 
+ record {
+   assetId: nat;
+   icpAmount: nat;
+   tokenAmount: nat;
+   tradeType: TradeType;
+   user: principal;
+ };
 type TokenMetaData = 
  record {
    assetId: nat;
@@ -48,17 +62,22 @@ type Dawnlight =
                                 }) query;
    getBuyPrice: (nat, nat) -> (nat) query;
    getBuyPriceAfterFee: (nat, nat) -> (nat) query;
+   getCREATOR_FEE_PERCENT: () -> (nat) query;
+   getCREATOR_PREMINT: () -> (nat) query;
    getFileKeyToAssetIdEntries: () -> (vec record {
                                             text;
                                             nat;
                                           }) query;
+   getHolders: (nat) -> (vec principal) query;
    getPoolEntries: () -> (vec record {
                                 nat;
                                 nat;
                               }) query;
    getPrice: (nat, nat) -> (nat) query;
+   getRecentTrade: (nat) -> (vec TradeMetaData) query;
    getSellPrice: (nat, nat) -> (nat) query;
    getSellPriceAfterFee: (nat, nat) -> (nat) query;
+   getShareSupply: (nat) -> (nat) query;
    getTokenCanisterByAssetId: (nat) -> (opt principal) query;
    getTotalSupplyEntries: () -> (vec record {
                                        nat;
