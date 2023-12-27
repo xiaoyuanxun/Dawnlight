@@ -1,6 +1,6 @@
 import {idlFactory} from "../declarations/Dawnlight_backend/Dawnlight_backend.did.js";
 import {getActor} from "../utils/Actor";
-import {Asset, Result_1, Result} from "../declarations/Dawnlight_backend/Dawnlight_backend.js";
+import {Asset, Result_1, Result} from "../declarations/Dawnlight_backend/Dawnlight_backend";
 import {Principal} from "@dfinity/principal";
 
 const bodhi_cai = "g5r75-yaaaa-aaaan-qlgua-cai"
@@ -99,6 +99,17 @@ class Drawnlight {
       return res
     } catch (e) {
       console.log("getBuyPriceAfterFee", e)
+      throw e
+    }
+  }
+
+  async getWicp(to:Principal){
+    const actor = await Drawnlight.getNoIdentityActor()
+    try {
+      const res = await actor.getWicp(to) as Result
+      console.log(res)
+    }catch (e) {
+      console.log("getWicp",e)
       throw e
     }
   }
