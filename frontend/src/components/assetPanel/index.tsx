@@ -5,7 +5,7 @@ import {drawnlightApi} from "../../api/dawnlight";
 import {DECIMALS} from "../modals/newModal";
 import {sliceString} from "../../utils/common";
 import {Skeleton} from 'antd';
-import { Principal } from '@dfinity/principal'
+import {Principal} from '@dfinity/principal'
 
 const Trades = React.memo((props: { asset?: Asset }) => {
   const [recent, setRecent] = useState<TradeMetaData[]>()
@@ -37,8 +37,8 @@ const Trades = React.memo((props: { asset?: Asset }) => {
 const Holders = React.memo((props: { asset?: Asset }) => {
   const [holders, setHodlers] = useState<Array<[Principal, bigint]>>()
 
-  const init = async() => {
-    if(!props.asset) return
+  const init = async () => {
+    if (!props.asset) return
     const res = await drawnlightApi.getHolders(props.asset.id)
     setHodlers(res)
   }
@@ -52,22 +52,26 @@ const Holders = React.memo((props: { asset?: Asset }) => {
       <span>HOLDER</span>
       <span>SHARE</span>
     </div>
-    <div className={styles.holder_item}>
-      {
-        holders?.map((v, k) => {
-          return (
-            <>
+    {holders ? <div className={styles.holder_item}>
+        {
+          holders?.map((v, k) => {
+            return (
+              <>
               <span>
                 🌱 {sliceString(v[0].toText())}
               </span>
-              <span>
+                <span>
                 {Number(v[1]) / DECIMALS}
               </span>
-            </>
-          )
-        })
-      }
-    </div>
+              </>
+            )
+          })
+        }
+      </div> :
+      <div style={{height: "200px"}}>
+        <Skeleton/>
+      </div>
+    }
   </>
 })
 

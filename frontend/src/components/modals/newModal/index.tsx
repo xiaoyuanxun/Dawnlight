@@ -6,12 +6,12 @@ import styles from "./index.less"
 import {bucketApi} from "../../../api/bucket";
 import {useDropzone} from "react-dropzone";
 import {useAuth} from "../../../utils/useAuth";
-import { drawnlightApi } from '../../../api/dawnlight';
-import type { RadioChangeEvent } from 'antd';
+import {drawnlightApi} from '../../../api/dawnlight';
+import type {RadioChangeEvent} from 'antd';
 import {LoadingOutlined, CheckOutlined, CloseOutlined} from '@ant-design/icons';
-import { icrcApi } from '../../../api/icrc';
-import { Principal } from '@dfinity/principal';
-import { getSubAccount } from '../../../utils/common';
+import {icrcApi} from '../../../api/icrc';
+import {Principal} from '@dfinity/principal';
+import {getSubAccount} from '../../../utils/common';
 
 export const DECIMALS: number = 100_000_000;
 const TEST_ICP_CANISTER = 'gttsv-dqaaa-aaaan-qlgva-cai';
@@ -31,7 +31,7 @@ export const NewModal = React.memo((props: { open: boolean, setOpen: Function })
            display: 'inline-flex',
            alignItems: "center",
          }}>
-            <svg style={{marginRight: "8px"}} stroke="currentColor" fill="currentColor" stroke-width="0"
+            <svg style={{marginRight: "8px"}} stroke="currentColor" fill="currentColor" strokeWidth="0"
                  viewBox="0 0 448 512" aria-hidden="true"
                  focusable="false" height="16" width="16" xmlns="http://www.w3.org/2000/svg"><path
               d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"></path></svg>
@@ -50,8 +50,31 @@ export const NewModal = React.memo((props: { open: boolean, setOpen: Function })
 })
 
 const Step1 = React.memo((props: { setStep: Function }) => {
-  const onDrop = React.useCallback((files: File[]) => {
-    bucketApi.storeFile(files[0]).then(e => console.log("ok"))
+  const [api, contextHolder] = notification.useNotification();
+  const onDrop = React.useCallback(async (files: File[]) => {
+    try {
+      api.info({
+        message: 'uploading',
+        key: 'upload',
+        duration: null,
+        description: '',
+        icon: <LoadingOutlined/>
+      })
+      await bucketApi.storeFile(files[0])
+      api.success({
+        message: 'upload Successful !',
+        key: 'upload',
+        description: '',
+        icon: <CheckOutlined/>
+      });
+    } catch (e) {
+      api.error({
+        message: 'upload failed !',
+        key: 'upload',
+        description: '',
+        icon: <CloseOutlined/>
+      });
+    }
   }, [])
 
   const {getRootProps, getInputProps} = useDropzone({onDrop, multiple: false})
@@ -66,6 +89,7 @@ const Step1 = React.memo((props: { setStep: Function }) => {
       <p className={styles.p1}>Write Something</p>
       <p className={styles.p2}>Short messages or long article with markdown</p>
     </div>
+    {contextHolder}
     <div style={{height: "16px"}}/>
 
     <div className={styles.new_modal_item} {...getRootProps()}>
@@ -87,15 +111,40 @@ const Step1 = React.memo((props: { setStep: Function }) => {
 
 const Step2 = React.memo(() => {
   const [value, setValue] = useState<string>("")
+  const [api, contextHolder] = notification.useNotification();
 
   const handleClick = async () => {
-    await bucketApi.store(value)
-    console.log("ok")
+    try {
+      api.info({
+        message: 'uploading',
+        key: 'upload',
+        duration: null,
+        description: '',
+        icon: <LoadingOutlined/>
+      })
+      await bucketApi.store(value)
+      api.success({
+        message: 'upload Successful !',
+        key: 'upload',
+        description: '',
+        icon: <CheckOutlined/>
+      });
+    } catch (e) {
+      api.error({
+        message: 'upload failed !',
+        key: 'upload',
+        description: '',
+        icon: <CloseOutlined/>
+      });
+    }
+
   }
+
   return <div className={styles.new_modal_content}>
     <textarea onChange={(e: any) => setValue(e.target.value)} placeholder={"Write something here.Markdown Supported"}
               name=""
               id="" rows={5}/>
+    {contextHolder}
     <div className={styles.preview_wrap}>
       <a href={"/editor"}>Switch to Markdown Editor</a>
       <span onClick={handleClick}>Upload</span>
@@ -103,10 +152,10 @@ const Step2 = React.memo(() => {
   </div>
 })
 
-export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, assetId: number}) => {
+export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, assetId: number }) => {
   const {open, setOpen, assetId} = props
   const [step, setStep] = useState(0)
-  const {identity,isAuth} = useAuth()
+  const {identity, isAuth} = useAuth()
   const [value, setValue] = useState(1);
   const [amount, setAmount] = useState(1);
   const [price, setPrice] = useState(1);
@@ -118,16 +167,16 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
   };
 
   const initBuyPrice = async () => {
-    if(assetId != undefined && !Number.isNaN(assetId)) {
-      if(value === 1) {
+    if (assetId != undefined && !Number.isNaN(assetId)) {
+      if (value === 1) {
         const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(DECIMALS))
         setPrice(Number(price))
         setAmount(DECIMALS)
-      } else if(value === 2) {
+      } else if (value === 2) {
         const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(10 * DECIMALS))
         setPrice(Number(price))
         setAmount(10 * DECIMALS)
-      } else if(value === 3) {
+      } else if (value === 3) {
         const price = await drawnlightApi.getBuyPriceAfterFee(BigInt(assetId), BigInt(100 * DECIMALS))
         setPrice(Number(price))
         setAmount(100 * DECIMALS)
@@ -139,7 +188,7 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
     }
   };
 
-  const buy = async() => {
+  const buy = async () => {
     const _asset = assetId;
     const _amount = amount;
     api.info({
@@ -169,7 +218,7 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
       amount: BigInt(price)
     });
     console.log(transferResult)
-    if('Ok' in transferResult) {
+    if ('Ok' in transferResult) {
       api.success({
         message: 'Transfer TEST ICP Successful !',
         key: 'transfer',
@@ -177,7 +226,7 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
         icon: <CheckOutlined/>
       });
       const buyResult = await drawnlightApi.buy(BigInt(_asset), BigInt(_amount))
-      if(buyResult == null) {
+      if (buyResult == null) {
         api.success({
           message: 'Buy Asset Successful !',
           key: 'buy',
@@ -190,13 +239,13 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
         message: 'Transfer TEST ICP Error !',
         key: 'transfer',
         description: '',
-        icon: <CloseOutlined />
+        icon: <CloseOutlined/>
       });
       api.error({
         message: 'Buy Asset Error !',
         key: 'buy',
         description: '',
-        icon: <CloseOutlined />
+        icon: <CloseOutlined/>
       });
     }
   }
@@ -233,12 +282,12 @@ export const BuyModal = React.memo((props: { open: boolean, setOpen: Function, a
   );
 })
 
-export const SellModal = React.memo((props: { open: boolean, setOpen: Function, assetId: number}) => {
+export const SellModal = React.memo((props: { open: boolean, setOpen: Function, assetId: number }) => {
   const {open, setOpen, assetId} = props
   const [step, setStep] = useState(0)
-  const {identity,isAuth} = useAuth()
+  const {identity, isAuth} = useAuth()
   const [value, setValue] = useState(1);
-  const [amount, setAmount] = useState(1); 
+  const [amount, setAmount] = useState(1);
   const [price, setPrice] = useState(1);
   const [api, contextHolder] = notification.useNotification();
   const [assetToken, setAssetToken] = useState<Principal>()
@@ -249,16 +298,16 @@ export const SellModal = React.memo((props: { open: boolean, setOpen: Function, 
   };
 
   const initSellPrice = async () => {
-    if(assetId != undefined && !Number.isNaN(assetId)) {
-      if(value === 1) {
+    if (assetId != undefined && !Number.isNaN(assetId)) {
+      if (value === 1) {
         const price = await drawnlightApi.getSellPriceAfterFee(BigInt(assetId), BigInt(DECIMALS))
         setPrice(Number(price))
         setAmount(DECIMALS)
-      } else if(value === 2) {
+      } else if (value === 2) {
         const price = await drawnlightApi.getSellPriceAfterFee(BigInt(assetId), BigInt(10 * DECIMALS))
         setPrice(Number(price))
         setAmount(10 * DECIMALS)
-      } else if(value === 3) {
+      } else if (value === 3) {
         const price = await drawnlightApi.getSellPriceAfterFee(BigInt(assetId), BigInt(100 * DECIMALS))
         setPrice(Number(price))
         setAmount(100 * DECIMALS)
@@ -270,16 +319,16 @@ export const SellModal = React.memo((props: { open: boolean, setOpen: Function, 
     }
   };
 
-  const initAssetToken = async() => {
-    if(assetId != undefined && !Number.isNaN(assetId)) {
+  const initAssetToken = async () => {
+    if (assetId != undefined && !Number.isNaN(assetId)) {
       const res = await drawnlightApi.getAssetIdToToken(BigInt(assetId))
-      if(res.length > 0) {
+      if (res.length > 0) {
         setAssetToken(res[0])
-      } 
+      }
     }
   }
 
-  const sell = async() => {
+  const sell = async () => {
     const _asset = assetId;
     const _amount = amount;
     api.info({
@@ -309,7 +358,7 @@ export const SellModal = React.memo((props: { open: boolean, setOpen: Function, 
       amount: BigInt(amount)
     });
     // console.log(transferResult)
-    if('Ok' in transferResult) {
+    if ('Ok' in transferResult) {
       api.success({
         message: 'Transfer Asset Token Successful !',
         key: 'transfer',
@@ -317,7 +366,7 @@ export const SellModal = React.memo((props: { open: boolean, setOpen: Function, 
         icon: <CheckOutlined/>
       });
       const sellResult = await drawnlightApi.sell(BigInt(_asset), BigInt(_amount))
-      if(sellResult == null) {
+      if (sellResult == null) {
         api.success({
           message: 'Sell Asset Successful !',
           key: 'sell',
@@ -330,19 +379,19 @@ export const SellModal = React.memo((props: { open: boolean, setOpen: Function, 
         message: 'Transfer Asset Token Error !',
         key: 'transfer',
         description: '',
-        icon: <CloseOutlined />
+        icon: <CloseOutlined/>
       });
       api.error({
         message: 'Sell Asset Error !',
         key: 'sell',
         description: '',
-        icon: <CloseOutlined />
+        icon: <CloseOutlined/>
       });
     }
   }
 
   const test = async () => {
-    if(assetToken) {
+    if (assetToken) {
       const res = await icrcApi(assetToken.toString()).icrc1_balance_of({
         owner: Principal.fromText(DAWNLIGHT_CANISTER),
         subaccount: [getSubAccount(identity?.getPrincipal() as Principal)]
