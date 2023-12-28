@@ -56,14 +56,16 @@ const Holders = React.memo((props: { asset?: Asset }) => {
         {
           holders?.map((v, k) => {
             return (
-              <>
+              <div style={{
+                borderBottom: "1px solid rgb(237, 242, 247)",padding:"3px 0"
+              }}>
               <span>
                 🌱 {sliceString(v[0].toText())}
               </span>
                 <span>
                 {Number(v[1]) / DECIMALS}
               </span>
-              </>
+              </div>
             )
           })
         }

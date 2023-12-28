@@ -120,12 +120,11 @@ const Card = React.memo((props: { asset: shareAsset }) => {
   const url = `https://r4yar-zqaaa-aaaan-qlfja-cai.raw.icp0.io/${asset.fileKey}`
 
 
-
   return <div className={styles.card_warp}>
     <span style={{padding: "0"}}>#{Number(asset.id)}</span>
     <span style={{cursor: "pointer"}} onClick={() => navigate(`/${asset.id}`)}>
       {Type === "text" ? <TXT/> : Type === "image" ? <img
-        src={url}
+        src={url} height={100} width={100} style={{borderRadius: "8px"}}
         alt=""/> : <video height={100} width={100} style={{borderRadius: "8px"}} src={url}/>}
     </span>
     <span>{asset.share / DECIMALS}</span>
