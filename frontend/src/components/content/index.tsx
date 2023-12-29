@@ -152,7 +152,7 @@ const FixedDiv = React.memo(() => {
   const navigate = useNavigate()
   return <div style={{display: id !== undefined ? "none" : "flex"}} className={styles.fixed_panel}
               onClick={() => navigate("/explore")}>
-    Enter Bodhi
+    Enter Dawnlight
   </div>
 })
 

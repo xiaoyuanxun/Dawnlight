@@ -40,9 +40,11 @@ pub const USERE: &str = "identity/5.pem";
 
 #[tokio::main]
 async fn main() {
-    local_test::test_store_file().await;
-    local_test::test_create().await;
+    // local_test::test_store_file().await;
+    // local_test::test_create().await;
     // ic_test::test_store_file().await;
 
     // println!("{}", utils::get_principal(USERA).to_string());
+
+    ic_test::test_store_file().await;
 }

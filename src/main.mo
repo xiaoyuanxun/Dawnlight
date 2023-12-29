@@ -88,17 +88,27 @@ actor class Dawnlight(
     userBuyedAssets_entries := [];
   };
 
-  public query func getAssetIdToToken(assetId: Nat): async ?Principal {
-    switch(assetIdToToken.get(assetId)) {
-      case(null) null;
-      case(?_tokenMetaData) ?_tokenMetaData.canisterId;
-    }
+  public query func getASSET_INDEX(): async Nat { ASSET_INDEX };
+
+  public query func getCreateEventEntries(): async [(Nat, Principal, Text)] {
+    CreateEvent
+  };
+
+  public query func getRemoveEventEntires(): async [(Nat, Principal)] {
+    RemoveEvent
   };
 
   public query func getTradeEventEntries(): async [(
     TradeType, Nat, Principal, Nat, Nat, Nat
   )] {
     TradeEvent
+  };
+
+  public query func getAssetIdToToken(assetId: Nat): async ?Principal {
+    switch(assetIdToToken.get(assetId)) {
+      case(null) null;
+      case(?_tokenMetaData) ?_tokenMetaData.canisterId;
+    }
   };
 
   public query func getPoolValue(assetId: Nat): async Nat {
@@ -134,7 +144,21 @@ actor class Dawnlight(
       }
     };
     // 添加作者本人
-
+    switch(assets.get(assetId)) {
+      case(null) { };
+      case(?_asset) {
+        var _index = 0;
+        for((_user, _amount) in holdersBuffer.vals()) {
+          if(_user == _asset.creator) {
+            ignore holdersBuffer.remove(_index);
+            holdersBuffer.add((_user, _amount + DECIMALS));
+            return Buffer.toArray<(Principal, Nat)>(holdersBuffer)
+          };
+          _index += 1;
+        };
+        holdersBuffer.add((_asset.creator, DECIMALS));
+      }
+    };
     Buffer.toArray<(Principal, Nat)>(holdersBuffer)
   };
 
@@ -257,8 +281,8 @@ actor class Dawnlight(
 
             Cycles.add(T_CYCLES);
             let token = await Token.Token({
-              name = "bodhi_ic_" # Nat.toText(newAssetId);
-              symbol = "bodhi_ic_" # Nat.toText(newAssetId);
+              name = "Dawnlight" # Nat.toText(newAssetId);
+              symbol = "Dawnlight" # Nat.toText(newAssetId);
               decimals = 8;
               fee = TOKEN_FEE;
               max_supply = MAX_SUPPLY;
@@ -389,7 +413,7 @@ actor class Dawnlight(
   };
 
   // getBuyPriceAfterFee 查询付的钱
-  // 调wicp 转 bodhi_caniser, subAccount(Principal.toBlob(caller))
+  // 调wicp 转 Dawnlight_caniser, subAccount(Principal.toBlob(caller))
   // amount 0.01 share = 0.01 * 1e18
   public shared({caller}) func buy(
     assetId: Nat,
@@ -555,7 +579,7 @@ actor class Dawnlight(
 
   // 得先获取 token 的 canister_id getTokenCanisterByAssetId
   // getSellPriceAfterFee 获取 token 要转的amount
-  // 调token canister 转给 bodhi_caniser, sub(Principal.toBlob(caller))
+  // 调token canister 转给 Dawnlight_caniser, sub(Principal.toBlob(caller))
   // amount * 1e8
   public shared({caller}) func sell(
     assetId: Nat,

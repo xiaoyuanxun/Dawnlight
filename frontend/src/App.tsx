@@ -9,12 +9,6 @@ import {Editor} from "./components/editor";
 import {drawnlightApi} from "./api/dawnlight";
 
 function App() {
-  //
-  // useEffect(() => {
-  //   bodhiApi.getAssetsEntries().then(e => {
-  //     console.log(e)
-  //   })
-  // }, [])
 
   return (
     <div className="App">

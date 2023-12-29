@@ -3,7 +3,7 @@ import {getActor} from "../utils/Actor";
 import {Asset, Result, Result_1, TradeMetaData} from "../declarations/Dawnlight_backend/Dawnlight_backend";
 import {Principal} from "@dfinity/principal";
 
-const bodhi_cai = "g5r75-yaaaa-aaaan-qlgua-cai"
+const dawnlight_cai = "g5r75-yaaaa-aaaan-qlgua-cai"
 
 export type shareAsset = Asset & {
   share: number
@@ -11,11 +11,11 @@ export type shareAsset = Asset & {
 
 class Drawnlight {
   private static async getActor() {
-    return await getActor.createActor(idlFactory, bodhi_cai);
+    return await getActor.createActor(idlFactory, dawnlight_cai);
   }
 
   private static async getNoIdentityActor() {
-    return await getActor.noIdentityActor(idlFactory, bodhi_cai)
+    return await getActor.noIdentityActor(idlFactory, dawnlight_cai)
   }
 
   async create(fileKey: string): Promise<Principal> {
