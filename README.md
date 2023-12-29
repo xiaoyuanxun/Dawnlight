@@ -1,7 +1,26 @@
 # Dawnlight 曦光
 
 ## Product Introduction
-我们想帮助公共物品们。
+
+**Empowering Content Creation and Public Goods**
+
+Society benefits from many excellent public goods, such as open-source code, blogs, novels, videos, and more.
+
+Some code must be open source to gain trust, some videos need to be watched to determine their quality, and some blogs consistently help a certain group of people.
+
+Public goods contribute to societal value but often struggle to generate revenue.
+
+These public goods exist independently, either being exploited by others for free or collecting dust in a corner. How can we better support public goods?
+
+We are attempting to tokenize and publicly issue public goods, providing expected returns to purchasers—like gold that will always shine.
+
+We aim to distribute public goods in a manner similar to projects like Bodhi and FT: the price of each share gradually increases with the growing number of buyers.
+
+Previously, only companies had this model, but with blockchain projects able to issue their own FT, it has become more decentralized. Essentially, any public good can issue FT.
+
+By offering donors an expected return on investment, we encourage people to spontaneously contribute early donations to valuable public goods.
+
+The entire process of asset issuance and returns is managed through smart contracts, ensuring transparency.
 
 社会从许多优秀的公共物品中受益，开源代码、博客、小说、视频 等等。
 
@@ -20,9 +39,9 @@
 通过给捐助者一个投资回报预期，促进人们自发地对有价值的公共物品进行早期捐助。
 将资产发行和回报的过程都放在智能合约上，使之公开透明。
 
-## 部署
+## Deploy
 
-### 本地
+### Local
 
 ```shell
 dfx deploy icrc_token --argument '(record {
@@ -52,7 +71,7 @@ dfx deploy Dawnlight_backend --argument '(principal "bkyz2-fmaaa-aaaaa-qaaaq-cai
 dfx wallet send $(dfx canister id Dawnlight_backend) 10000000000000
 ```
 
-### 主网
+### IC
 ```
 bucket : r4yar-zqaaa-aaaan-qlfja-cai
 
